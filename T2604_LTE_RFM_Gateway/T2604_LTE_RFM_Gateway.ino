@@ -41,7 +41,7 @@ void setup() {
     Serial.begin(115200);
 
     delay(1500);
-    Serial1.begin(9600);
+    Serial1.begin(115200);
     uint8_t key[] = RFM69_KEY;
     atask_initialize();
 

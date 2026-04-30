@@ -13,6 +13,7 @@
 
 #define LteSerial Serial1
 #define SMS_LEN     160
+#define MSG_LEN     512
 
 typedef enum
 {
@@ -47,9 +48,11 @@ typedef enum
 
 typedef struct 
 {
+    char msg[MSG_LEN];
     char sender[32];
-    char message[256];
     char timestamp[32];
+    char body[SMS_LEN];
+    uint16_t cursor;
     date_time_st date_time;
     contact_indx_st contact_indx;
     bool complete;
