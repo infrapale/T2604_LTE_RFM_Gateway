@@ -31,9 +31,10 @@ contact_st contact_list[NAME_NBR_OF] =
 
 
 // Function prototypes
+bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg);
 void lte_task(void);
 //                                  123456789012345   ival  next  state  prev  cntr flag  call backup
-atask_st lte_th              =    {"LTE Task       ", 10,     0,     0,  255,    0,  1,  lte_task };
+atask_st lte_th              =    {"LTE Task       ", 100,    0,     0,  255,    0,  1,  lte_task };
 
 void lte_initialize(void)
 {
@@ -43,49 +44,29 @@ void lte_initialize(void)
 
 
 
-uint16_t lte_read_msg()
-{
-    uint32_t timeout_at = millis() + 2000;
-    bool      do_continue = true;
-
-
-    lte_msg.complete = false;
-    lte_msg.cursor = 0;
-    // lte_msg.msg 
-
-    if (LteSerial.available())
-    {
-        while ((millis() < timeout_at) && do_continue) {
-            if (LteSerial.available()) {
-                lte_msg.msg[lte_msg.cursor] = LteSerial.read();
-                if (lte_msg.cursor < MSG_LEN-1) lte_msg.cursor++;
-            }   
-            else delay(2);
-        }
-        lte_msg.msg[lte_msg.cursor] = 0;
-        Serial.printf("lte_read_msg: %d - %s\n",lte_msg.cursor,lte_msg.msg);
-    }
-    return lte_msg.cursor;
-}
-
-uint16_t lte_read_line(char *lp, uint16_t max_len, uint32_t timeout = 5000)
+uint16_t lte_read_line(char *lp, uint16_t max_len, uint32_t timeout = 1000)
 {
     uint32_t timeout_at = millis() + timeout;
     uint16_t cursor = 0;
     bool      do_continue = true;
+    char    c;
 
     while ((millis() < timeout_at) && do_continue) {
         if (LteSerial.available()) {
-            lp[cursor] = LteSerial.read();
-            timeout_at += 100;   //millis() + 50;
-            if (lp[cursor] == '\n') do_continue = false;
-            if (cursor >= max_len-2) do_continue = false;
-            cursor++;
+            c = LteSerial.read();
+            if( (c != '\r') && (c != '\n')){
+                lp[cursor] = c;
+                timeout_at = millis() + 10;
+                //if (lp[cursor] == '\n') do_continue = false;
+                if (cursor >= max_len-2) do_continue = false;
+                cursor++;
+            }
         } 
         else delay(2);
     }
     lp[cursor] = 0x00;
-    Serial.printf("cursor=%d - %s\n", cursor, lp);
+    // Serial.printf("cursor=%d - %s\n", cursor, lp);
+    if (cursor > 0) lte_msg.available = true;
     return cursor;
 }
 
@@ -121,15 +102,12 @@ void lte_send_at(const char *cmd, uint32_t wait = 500) {
   Serial.println();
 }
 
-
-
 void lte_clear_msg(lte_msg_st *lte_msg)
 {
     lte_msg->complete = false;
     memset(lte_msg->sender,0x00,sizeof(lte_msg->sender));
     memset(lte_msg->timestamp,0x00,sizeof(lte_msg->timestamp));
-    memset(lte_msg->msg,0x00,sizeof(lte_msg->msg));
-    memset(lte_msg->body,0x00,sizeof(lte_msg->body));
+    memset(lte_msg->message,0x00,sizeof(lte_msg->message));
     lte_msg->date_time.year = 0;
     lte_msg->date_time.month = 0;
     lte_msg->date_time.day = 0;
@@ -154,7 +132,7 @@ void lte_print_msg(lte_msg_st *lte_msg)
         lte_msg->date_time.minute,
         lte_msg->date_time.second);
     Serial.print("Message: ");
-    Serial.println(lte_msg->body);
+    Serial.println(lte_msg->message);
 
 }
 
@@ -165,40 +143,25 @@ uint8_t lte_get_contact_index(char *nbr)
 
     while((contact == NAME_UNKNOWN) && (cindx < NAME_NBR_OF))
     {
-        Serial.printf("Compare -%s-%s-\n",nbr,contact_list[cindx].sender);
+        //Serial.printf("Compare -%s-%s-\n",nbr,contact_list[cindx].sender);
         if (strcmp(nbr, contact_list[cindx].sender) == 0) contact = cindx;
         else cindx++;
     }
     return contact;
 }
-
-char* safe_strchr_mut(char *buf, size_t max_len, char target)
-{
-    if (!buf) return NULL;
-
-    for (size_t i = 0; i < max_len; i++) {
-        if (buf[i] == '\0') return NULL;
-        if (buf[i] == target) return &buf[i];
-    }
-    return NULL;
-}
-
-
-bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
+bool lte_parse_message(void)
 {
     // +CMT: "+358401234567","","24/03/27,12:45:10+08"
-    bool parse_res = true;
-    const char *p = msg;
-    //Serial.printf("#%s#\n",msg);
-    while((*p == '\n') || (*p == '\r') || (*p == ' ')) p++;
-    Serial.printf("#%s#\n",p);
+    bool        parse_res = true;
+    const char  *p = lte_msg.message;
+    const char  *q;
+    char        *end_ptr;
+    char        ch_nbr[8];
+    uint16_t    u16;
+    size_t      len;
 
-    if (strncmp(p, "+CMT", 4) == 0) {
+    if (strncmp(lte_msg.message, "+CMT", 4) == 0) {
 
-        const char *q;
-        char *end_ptr;
-        char ch_nbr[8];
-        uint16_t  u16;
 
         // char sender[32] = {0};
         // char timestamp[32] = {0};
@@ -209,11 +172,10 @@ bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
         q = strchr(p + 1, '"');
         if (!q) return false;
         size_t len = q - (p + 1);
-        if (len < sizeof(lte_msg->sender))
-            memcpy(lte_msg->sender, p + 1, len);
+        if (len < sizeof(lte_msg.sender))
+            memcpy(lte_msg.sender, p + 1, len);
 
-        Serial.print("[INFO] Sender: ");
-        Serial.println(lte_msg->sender);
+        //Serial.printf("[INFO] Sender: %s", lte_msg.sender);
 
         // Timestamp: 26/04/22,11:08:12+12
         // Find timestamp (4th quoted field)
@@ -222,18 +184,18 @@ bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
         p = strchr(p + 1, '"'); if (!p) return false;
         q = strchr(p + 1, '"'); if (!q) return false;
         len = q - (p + 1);
-        if (len < sizeof(lte_msg->timestamp))
+        if (len < sizeof(lte_msg.timestamp))
         {
-            Serial.print("[parse header] 110: ");
-            memcpy(lte_msg->timestamp, p+1, len);
-            lte_msg->timestamp[len] = '\0';
-            p = lte_msg->timestamp;
+            //Serial.print("[parse header] 110: ");
+            memcpy(lte_msg.timestamp, p+1, len);
+            lte_msg.timestamp[len] = '\0';
+            p = lte_msg.timestamp;
             q = strchr(p + 1, '/');
             len = q - p;
             memcpy(ch_nbr, p, len);
             ch_nbr[len] = '\0';
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
-            if (*end_ptr == '\0') lte_msg->date_time.year = u16;
+            if (*end_ptr == '\0') lte_msg.date_time.year = u16;
 
             p = q+1;
             q = strchr(p + 1, '/');
@@ -241,7 +203,7 @@ bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
             memcpy(ch_nbr, p, len);
             ch_nbr[len] = '\0';
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
-            if (*end_ptr == '\0') lte_msg->date_time.month = (uint8_t)u16;
+            if (*end_ptr == '\0') lte_msg.date_time.month = (uint8_t)u16;
 
             p = q+1;
             q = strchr(p + 1, ',');
@@ -249,7 +211,7 @@ bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
             memcpy(ch_nbr, p, len);
             ch_nbr[len] = '\0';
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
-            if (*end_ptr == '\0') lte_msg->date_time.day = (uint8_t)u16;
+            if (*end_ptr == '\0') lte_msg.date_time.day = (uint8_t)u16;
 
             p = q+1;
             q = strchr(p + 1, ':');
@@ -257,66 +219,42 @@ bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
             memcpy(ch_nbr, p, len);
             ch_nbr[len] = '\0';
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
-            if (*end_ptr == '\0') lte_msg->date_time.hour = (uint8_t)u16;
+            if (*end_ptr == '\0') lte_msg.date_time.hour = (uint8_t)u16;
             p = q+1;
             q = strchr(p + 1, ':');
             len = q - p;
             memcpy(ch_nbr, p, len);
             ch_nbr[len] = '\0';
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
-            if (*end_ptr == '\0') lte_msg->date_time.minute = (uint8_t)u16;
+            if (*end_ptr == '\0') lte_msg.date_time.minute = (uint8_t)u16;
             p = q+1;
             q = strchr(p + 1, '+');
             len = q - p;
             memcpy(ch_nbr, p, len);
             ch_nbr[len] = '\0';
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
-            if (*end_ptr == '\0') lte_msg->date_time.second = (uint8_t)u16;
-
-            // parse body ------------------------------------
-            const char *bodyp = q+1;
-            q = safe_strchr_mut(bodyp, 10, '\n');
-            //len = strlen(lte_msg->msg)- q;
-            //Serial.printf("Body: %s \n", q);
-            //strncpy(lte_msg->body, q, SMS_LEN);
+            if (*end_ptr == '\0') lte_msg.date_time.second = (uint8_t)u16;
 
         } else parse_res = false;
 
 
-        Serial.print("[INFO] Timestamp: ");
-        Serial.println(lte_msg->timestamp);
-        Serial.println(lte_msg->body);
+        //Serial.print("[INFO] Timestamp: "); Serial.println(lte_msg.timestamp);
 
         // strncpy(lte_msg->sender, sender, sizeof(lte_msg->sender));
         // strncpy(lte_msg->timestamp, timestamp, sizeof(lte_msg->timestamp));
-    } else {
-        parse_res = false;
-        Serial.println("+CMT was not found");
+    } else parse_res = false;
+
+
+    if (parse_res) 
+    {
+        p = q+1;
+        q = strchr(p + 1, '\0');
+        len = q - p;
+        memcpy(lte_msg.body, p, len);
+        lte_msg.body[len] = '\0';
     }
+
     return parse_res;
-}
-
-bool lte_parse_msg_body(lte_msg_st *lte_msg, const char *msg)
-{
-    // Ignore lines that look like headers or empty noise
-    if (msg[0] == '+' || msg[0] == '\r' || msg[0] == '\n' || msg[0] == 0) {
-        return false;
-    }
-
-    // Make a clean copy without trailing CR/LF
-    char tmp[SMS_LEN] = {0};
-    strncpy(tmp, msg, sizeof(tmp) - 1);
-
-    char *p = tmp;
-    while (*p == '\r' || *p == '\n') p++;
-
-    char *end = tmp + strlen(tmp);
-    while (end > p && (end[-1] == '\r' || end[-1] == '\n')) {
-        *--end = '\0';
-    }
-
-    strncpy(lte_msg->msg, p, sizeof(lte_msg->msg) - 1);
-    return (lte_msg->msg[0] != 0);
 }
 
 
@@ -351,131 +289,7 @@ void lte_reply_msg(lte_msg_st *lte_msg)
     LteSerial.print(reply);
     LteSerial.write(26);
     Serial.printf("Reply: %s\n", reply);
-
 }
-
-// ------------------------------------------------------------
-// Check for incoming SMS (CMTI)
-// ------------------------------------------------------------
-// Consume all pending lines and try to build one complete SMS
-lte_msg_et lte_read_sms(void)
-{
-    char line[200];
-    bool header_ok = false;
-    bool body_ok   = false;
-
-    while (LteSerial.available()) {
-        uint16_t len = lte_read_line(line, sizeof(line), 200);
-        if (len == 0) break;
-
-        Serial.print("[LTE line] ");
-        Serial.println(line);
-
-        // Header line: +CMT: ...
-        if (!header_ok && strncmp(line, "+CMT", 4) == 0) {
-            if (lte_parse_msg_header(&lte_msg, line)) {
-                Serial.println("Header OK");
-                header_ok = true;
-            } else {
-                Serial.println("Header parse failed");
-            }
-            continue;
-        }
-
-        // Body line after header
-        if (header_ok && !body_ok) {
-            if (lte_parse_msg_body(&lte_msg, line)) {
-                Serial.println("Body OK");
-                body_ok = true;
-                break;      // we have a complete SMS
-            }
-        }
-    }
-
-    if (header_ok && body_ok) {
-        lte_msg.complete = true;
-        return LTE_MSG_BODY_OK;
-    }
-    if (header_ok) {
-        return LTE_MSG_HEADER_OK;
-    }
-    return LTE_MSG_EMPTY;
-}
-
-
-
-// lte_msg_et lte_read_sms_header() {
-//     lte_msg_et header_res = LTE_MSG_EMPTY;
-//     if (LteSerial.available())
-//     {
-//         char chline[200] ={0};
-//         uint16_t len = lte_read_line(chline,200,4000);
-//         Serial.print("chline: "); Serial.println(chline);
-//         //line.trim();
-//         if (len != 0) 
-//         {
-//             //   line.toCharArray(chline,200);
-//             Serial.print("[LTE read header] ");
-//             Serial.println(chline);
-//             if (lte_parse_msg_header(&lte_msg,chline)){
-//                 Serial.println("Header OK");
-//                 header_res = LTE_MSG_HEADER_OK;
-//             }
-//             else{
-//                     header_res = LTE_MSG_HEADER_INCORRECT;
-//                     Serial.println("Header incorrect");
-
-//             } 
-//         }
-//     }
-//     return header_res;
-// }
-
-// lte_msg_et lte_read_sms_body() {
-//   lte_msg_et body_res = LTE_MSG_EMPTY;;
-//   if (LteSerial.available())
-//   {
-//       char chline[200];
-//       uint16_t len = lte_read_line(chline,200,4000);
-//       Serial.println(chline);
-
-//       if (len != 0) 
-//       {
-//           Serial.print("[LTE read body] ");
-//           Serial.println(chline);
-//           if (lte_parse_msg_body(&lte_msg,chline)){
-//               Serial.println("Body OK");
-//               body_res = LTE_MSG_BODY_OK;
-//           }
-//       }
-//   }
-//   return body_res;
-// }
-
-// New: line-based SMS consumer, like in the working sketch
-void lte_check_incoming_sms(void)
-{
-    if (!LteSerial.available()) return;
-
-    char chline[200] = {0};
-    uint16_t len = lte_read_line(chline, sizeof(chline), 1000);
-    if (len == 0) return;
-
-    // Trim CR/LF
-    char *p = chline;
-    while (*p == '\r' || *p == '\n') p++;
-    char *end = chline + strlen(chline);
-    while (end > p && (end[-1] == '\r' || end[-1] == '\n')) *--end = '\0';
-
-    if (*p == 0) return;
-
-    Serial.print("[LTE read] ");
-    Serial.println(p);
-
-    lte_parse_msg_header(&lte_msg, p);   // handles +CMT
-    lte_parse_msg_body(&lte_msg, p);     // handles body
-}
-
 
 
 // ------------------------------------------------------------
@@ -495,13 +309,11 @@ void lte_modem_boot() {
   delay(3000);
 }
 
-
 // ------------------------------------------------------------
 // Setup
 // ------------------------------------------------------------
 void lte_setup() {
     lte_clear_msg(&lte_msg);
-    //lte_send_at("AT+IPR=9600");
     lte_send_at("AT");
     lte_send_at("ATE0");
     lte_send_at("AT+CPIN=\"1234\"");
@@ -571,98 +383,36 @@ void lte_task(void)
             lte_th.state = 100;
             break;
         case 100:
-            if (lte_read_msg() > 20){
-                lte_th.state = 110;
-            }
-
-            // lte_msg.complete = false;
-            // lte_check_incoming_sms();
-            // if (lte_msg.complete) {
-            //     lte_th.state = 200;
-            // }
+            if (lte_msg.available) lte_th.state = 110; 
             break;
-            // // Idle, waiting for incoming +CMT
-            // lte_msg.complete = false;
-            // {
-            //     lte_msg_et res = lte_read_sms();
-            //     switch (res) {
-            //         case LTE_MSG_BODY_OK:
-            //             lte_th.state = 200;
-            //             break;
-            //         case LTE_MSG_HEADER_OK:
-            //             // header only so far; stay in 100 and let next tick grab body
-            //             break;
-            //         case LTE_MSG_EMPTY:
-            //         default:
-            //             // nothing meaningful yet
-            //             break;
-            //     }
-            // }
-            // break;
         case 110:
-            //bool lte_parse_msg_header(lte_msg_st *lte_msg, const char *msg)
-            if(lte_parse_msg_header(&lte_msg, lte_msg.msg)){ 
-                Serial.println("Header is OK");
-                lte_print_msg(&lte_msg);
+            lte_msg.complete = false;
+            Serial.println(lte_msg.message);
+            if (lte_parse_message()) {
+                lte_th.state = 120; 
+                lte_msg.complete = true;
             }
-            lte_clear_msg(&lte_msg);
-            lte_th.state = 100;
+            else {
+                Serial.println("Incorrect message");
+                lte_clear_msg(&lte_msg);
+                lte_msg.available = false;
+                lte_th.state = 100;
+            }
             break;
-        case 200:
+        case 120:
             lte_msg.contact_indx = (contact_indx_st)lte_get_contact_index(lte_msg.sender);
             lte_print_msg(&lte_msg);
-            // lte_reply_msg(&lte_msg);
-            lte_clear_msg(&lte_msg);
-            lte_th.state = 100;
+            lte_th.state = 200;
             break;
 
-
-        // case 100:
-        //     lte_msg.complete = false;
-        //     header_status = lte_read_sms_header();
-        //     switch(header_status)
-        //     {
-        //        case LTE_MSG_HEADER_OK:
-        //             body_timeout = millis() + 2000;
-        //             lte_th.state = 110;
-        //            break;
-        //         case LTE_MSG_EMPTY:
-        //             break;
-        //         default:    
-        //             Serial.println("Incorrect Header");
-        //             break;
-        //     }
-        //     break;
-        // case 110:
-        //     body_status = lte_read_sms_body();
-        //     switch(body_status)
-        //     {
-        //         case LTE_MSG_BODY_OK: 
-        //             lte_msg.complete = true;
-        //             break;
-        //         case LTE_MSG_EMPTY:
-        //             Serial.println("Empty Body");
-        //             if (millis() > body_timeout){
-        //                 Serial.println("Body timeout");
-        //             }
-        //             break;
-        //         default:
-        //             Serial.println("Incorrect Body");
-        //             lte_th.state = 100;
-        //             break;
-        //     }
-        //     if(lte_msg.complete) lte_th.state = 200;
-        //     break;
-        // case 200:
-        //     lte_msg.contact_indx = (contact_indx_st)lte_get_contact_index(lte_msg.sender);
-        //     lte_print_msg(&lte_msg);
-        //     //lte_reply_msg(&lte_msg);
-        //     lte_clear_msg(&lte_msg);
-        //     lte_th.state = 100;
-        //     break;
+        case 200:
+            lte_reply_msg(&lte_msg);
+            lte_clear_msg(&lte_msg);
+            lte_msg.available = false;
+            lte_th.state = 100;
+            break;
 
     }
 }
-
 
 

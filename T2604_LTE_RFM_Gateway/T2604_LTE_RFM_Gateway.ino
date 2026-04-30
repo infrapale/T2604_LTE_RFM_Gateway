@@ -28,7 +28,7 @@ void modem_task(void);
 atask_st modem_handle   =     {"Radio Modem    ", 100,0, 0, 255, 0, 1, modem_task};
 atask_st debug_th       =     {"Debug Task     ", 2000,    0,     0,  255,    0,  1,  print_debug_task };
 
-
+extern lte_msg_st lte_msg;
 
 void print_debug_task(void)
 {
@@ -41,7 +41,7 @@ void setup() {
     Serial.begin(115200);
 
     delay(1500);
-    Serial1.begin(115200);
+    //Serial1.begin(115200);
     uint8_t key[] = RFM69_KEY;
     atask_initialize();
 
@@ -61,6 +61,12 @@ void setup1(){
 void loop() 
 {
     atask_run();
+    if (!lte_msg.available){
+        uint16_t len = lte_read_line(lte_msg.message, MSG_LEN, 1000);
+        if (len > 0){
+            Serial.printf("Message len: %d:<%s>\n", len, lte_msg.message);
+        }
+    }
 }
 
 void loop1()

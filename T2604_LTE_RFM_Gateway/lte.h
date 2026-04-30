@@ -48,13 +48,14 @@ typedef enum
 
 typedef struct 
 {
-    char msg[MSG_LEN];
+    char message[MSG_LEN];
     char sender[32];
     char timestamp[32];
     char body[SMS_LEN];
     uint16_t cursor;
     date_time_st date_time;
     contact_indx_st contact_indx;
+    bool available;
     bool complete;
 }  lte_msg_st;
 
@@ -66,5 +67,7 @@ typedef struct
 } contact_st;
 
 void lte_initialize(void);
+uint16_t lte_read_line(char *lp, uint16_t max_len, uint32_t timeout);
+
 
 #endif
