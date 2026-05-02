@@ -28,6 +28,11 @@ void modem_task(void);
 atask_st modem_handle   =     {"Radio Modem    ", 100,0, 0, 255, 0, 1, modem_task};
 atask_st debug_th       =     {"Debug Task     ", 2000,    0,     0,  255,    0,  1,  print_debug_task };
 
+#define BUFF_LEN   80
+char mbuff[BUFF_LEN];
+int16_t rssi;
+//node_data_st node_data;
+
 extern lte_msg_st lte_msg;
 
 void print_debug_task(void)
@@ -39,15 +44,21 @@ void setup() {
     Serial1.setTX(PIN_TX0);   
     Serial1.setRX(PIN_RX0);
     Serial.begin(115200);
+ 
+    SPI.setSCK( PIN_RFM_SCK );   
+    SPI.setTX( PIN_RFM_MOSI ); 
+    SPI.setRX( PIN_RFM_MISO );  
+    SPI.begin();
+
 
     delay(1500);
     //Serial1.begin(115200);
     uint8_t key[] = RFM69_KEY;
     atask_initialize();
 
-    // rfm69_modem.initialize(MY_MODULE_TAG, MY_MODULE_ADDR, key);
-    // rfm69_modem.radiate(__APP__);
-    // atask_add_new(&modem_handle);
+    rfm69_modem.initialize(MY_MODULE_TAG, MY_MODULE_ADDR, key);
+    rfm69_modem.radiate(__APP__);
+    atask_add_new(&modem_handle);
     atask_add_new(&debug_th);
     lte_initialize();
 }
@@ -66,6 +77,26 @@ void loop()
         if (len > 0){
             Serial.printf("Message len: %d:<%s>\n", len, lte_msg.message);
         }
+    }
+
+       if(rfm69_modem.msg_is_avail())
+    {
+        // rfm69_modem.get_msg(mbuff, BUFF_LEN, false);
+        rfm69_modem.get_msg(mbuff, BUFF_LEN, false);    //
+        Serial.println(mbuff);
+        rfm69_modem.get_msg_decode(mbuff, BUFF_LEN, true);
+        rssi = rfm69_modem.get_last_rssi();
+        Serial.print(mbuff); Serial.print(" RSSI: "); Serial.println(rssi);
+        //handler_parse_sensor_msg(mbuff, rssi, &node_data );
+        //Serial.printf("%s - %s - %s  %d\n", node_data.zone, node_data.item, node_data.value, node_data.rssi);
+
+        // if (handler_parse_msg(mbuff,rssi))
+        // {
+        //     // handler_process_event();
+        // }
+        //delay(3000);
+        //rfm69_modem.radiate_node_json((char*) "<R1X1J1:Dock;T_bmp1;9.1;->");
+        //rfm69_modem.radiate("OK");
     }
 }
 
