@@ -277,7 +277,7 @@ void lte_reply_msg(lte_msg_st *lte_msg)
         ch_avail = SMS_LEN - strlen(reply);
     }
 
-    cp = "  Tupa Temp = 22.3C";
+    cp = (char*)"  Tupa Temp = 22.3C";
     len = strlen(cp);
     if (ch_avail > len) {
         strncat(reply, cp, ch_avail);

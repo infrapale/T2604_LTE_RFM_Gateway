@@ -1,3 +1,29 @@
+
+
+-----------------------------------------------
+   if(modem69_modem.msg_is_avail())
+    {
+        // modem69_modem.get_msg(mbuff, BUFF_LEN, false);
+        modem69_modem.get_msg(mbuff, BUFF_LEN, false);    //
+        Serial.println(mbuff);
+        modem69_modem.get_msg_decode(mbuff, BUFF_LEN, true);
+        rssi = modem69_modem.get_last_rssi();
+        Serial.print(mbuff); Serial.print(" RSSI: "); Serial.println(rssi);
+        //handler_parse_sensor_msg(mbuff, rssi, &node_data );
+        //Serial.printf("%s - %s - %s  %d\n", node_data.zone, node_data.item, node_data.value, node_data.rssi);
+
+        // if (handler_parse_msg(mbuff,rssi))
+        // {
+        //     // handler_process_event();
+        // }
+        //delay(3000);
+        //modem69_modem.radiate_node_json((char*) "<R1X1J1:Dock;T_bmp1;9.1;->");
+        //modem69_modem.radiate("OK");
+    }
+
+-------------------------------------
+
+
 #include    <time.h>
 #include    "main.h"
 #include    "secrets.h"
