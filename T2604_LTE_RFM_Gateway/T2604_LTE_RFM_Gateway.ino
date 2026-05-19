@@ -12,6 +12,7 @@ https://github.com/infrapale/T2604_LTE_RFM_Gateway.git
 #include    "atask.h"
 #include    "io.h"
 #include    "lte.h"
+#include    "msg.h"
 
 
 #define IO_TICK_INTERVAL    (100)
@@ -52,6 +53,8 @@ void setup() {
     delay(1500);
     //Serial1.begin(115200);
     atask_initialize();
+    msg_initialize();
+    while(true) delay(100);    
 
     modem69_initialize();
     atask_add_new(&debug_th);

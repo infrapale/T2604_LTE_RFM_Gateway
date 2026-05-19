@@ -28,6 +28,7 @@ Sample messages:
 #include "secrets.h"
 #include <RH_RF69.h>
 #include "Rfm69Modem.h"
+#include "msg.h"
 
 #define     MSG_MAX_FIELD_NBR   16
 #define     MSG_FIELD_LEN       16
@@ -278,6 +279,7 @@ void handler_task(void)
                     case '<':
                         hctrl.msg_type = MSG_TYPE_LIST;
                         rfm69_modem.get_msg(hctrl.rx_mbuff, BUFF_LEN, true);
+                        msg_process(MSG_FROM_RFM, hctrl.rx_mbuff);
 
                         break;
                     case '{':
