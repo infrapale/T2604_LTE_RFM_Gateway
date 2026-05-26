@@ -16,6 +16,11 @@ bool msg_is_valid_char(char c);
 
 uint8_t msg_split(const char *msg);
 
+
+size_t msg_set_sms_string(char *sms_str);
+
+void msg_process_sms_cmd(void);
+
 void msg_process(msg_from_et from, char *raw_msg );
 
 void msg_sub_print(void);

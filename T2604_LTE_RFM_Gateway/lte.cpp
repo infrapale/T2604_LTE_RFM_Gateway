@@ -4,6 +4,7 @@
 #include    "io.h"
 #include    "atask.h"
 #include    "lte.h"
+#include    "msg.h"
 
 typedef struct
 {
@@ -131,8 +132,8 @@ void lte_print_msg(lte_msg_st *lte_msg)
         lte_msg->date_time.hour,
         lte_msg->date_time.minute,
         lte_msg->date_time.second);
-    Serial.print("Message: ");
-    Serial.println(lte_msg->message);
+    Serial.print("Body: ");
+    Serial.println(lte_msg->body);
 
 }
 
@@ -235,25 +236,23 @@ bool lte_parse_message(void)
             u16 = (uint16_t)strtol(ch_nbr,&end_ptr,10);
             if (*end_ptr == '\0') lte_msg.date_time.second = (uint8_t)u16;
 
+            p = lte_msg.message;
+            q = strchr(p, '+');
+            p = q+1;
+            q = strchr(p, '+');
+            p = q+1;
+            q = strchr(p, '+');
+            p = q+1;
+            q = strchr(p, '\"');
+            p = q+1;
+
+            strncpy(lte_msg.body,p,SMS_LEN);       
         } else parse_res = false;
-
-
         //Serial.print("[INFO] Timestamp: "); Serial.println(lte_msg.timestamp);
 
         // strncpy(lte_msg->sender, sender, sizeof(lte_msg->sender));
         // strncpy(lte_msg->timestamp, timestamp, sizeof(lte_msg->timestamp));
     } else parse_res = false;
-
-
-    if (parse_res) 
-    {
-        p = q+1;
-        q = strchr(p + 1, '\0');
-        len = q - p;
-        memcpy(lte_msg.body, p, len);
-        lte_msg.body[len] = '\0';
-    }
-
     return parse_res;
 }
 
@@ -391,6 +390,9 @@ void lte_task(void)
             if (lte_parse_message()) {
                 lte_th.state = 120; 
                 lte_msg.complete = true;
+                msg_set_sms_string(lte_msg.body);
+                msg_process_sms_cmd();
+
             }
             else {
                 Serial.println("Incorrect message");
@@ -406,7 +408,7 @@ void lte_task(void)
             break;
 
         case 200:
-            lte_reply_msg(&lte_msg);
+            // lte_reply_msg(&lte_msg);
             lte_clear_msg(&lte_msg);
             lte_msg.available = false;
             lte_th.state = 100;

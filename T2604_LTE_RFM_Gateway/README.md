@@ -46,6 +46,8 @@ UART Command Syntax
 2026 SMS and RFM433 Message Syntax:
    Frame: <X;Taget;From;func1;value1;func2;value2;...funcn;valuen;>
       X = Message Type
+          C = Control
+          T = Time
           R = Relay Control
           S = Sensor values
           A = Alarm
@@ -73,6 +75,10 @@ UART Command Syntax
       <R;MH1;TK1;KOK1;1;KOK2;0;KOK3;1>
       <R;TK1;ET1;0;TUP1;1;TUP2;1>
       <R;TK1;ET1;0;TUP1;1;TUP2;1>
+      <R;RANTA;PUMP;0>                  switch off the water/air pump
+      <R;RANTA;PUMP;1>                  switch on the water/air pump
+      <R;RANTA;PUMP;3600>               switch on the water/air pump for 1 hour
+      <C;KOTONA;n>                      set home mode = n  (TBD)
       <S;#;PIHA1;T;-12.3;H;44;L;2344>
       <S;#;RANTA;T;22.3;W;13.4;l;876>
       <A;#;PIHA2;PIR1;1;PIR2;0>
@@ -94,10 +100,31 @@ Time Message:           <##C1T1=;2026;03;12;10;12>
 Relay Mesage            <#R12=x>   x:  0=off, 1=on, T=toggle
 *******************************************************************************
 
+              -------------
+    SMS       |           | RFM Relay Message
+  ----------->|           |---------------->
+              |           |
+              -------------
 
 
+              -------------
+    SMS       |           | SMS Reply Message
+  ----------->|           |---------------->
+              |           |
+              -------------
 
 
+SMS Messages
+  SMS Control Messages
+    KOTONA 1    Set at home state             RFM: <C;#;SMS;KOTONA;1>
+    ALARM 0     Clear/set alarms              RFM: <C;#;SMS;ALARM;0>
+  SMS Relay Message
+    MH11 1      Turn on MH1-1                 RFM: <R;MH1;SMS;MH11;1>
+    PUMP 0      Turn off the pump:            RFM: <R;DOCK;SMS;PUMP;0> 
+    PUMP 3600   Turn the pump on for 1 hour:  RFM: <R;DOCK;SMS;PUMP;3600> 
+  SMS Get Sensor Values
+    PIHA1       Get PIHA1 sensor values       SMS: PIHA1;T;-12.3;H;44;L;2344
+    REPO1       Get sensor report 1           SMS: PIHA1;T;12.3;TUPA1;T;22.5;WATER;T;9.4 
 
 
 #RFM69 Messages:

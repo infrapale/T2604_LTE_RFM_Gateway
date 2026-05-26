@@ -22,7 +22,10 @@ https://github.com/infrapale/T2604_LTE_RFM_Gateway.git
 // Rfm69Modem      modem69_modem(&rf69,  PIN_RFM_RESET, -1 );
 modem_data_st   modem_data = {MY_MODULE_TAG, MY_MODULE_ADDR};
 
-main_ctrl_st ctrl = {0};
+main_ctrl_st main_ctrl = {
+    .next_io_tick = 0,
+    .my_addr = "SMS1",
+};
 
 void print_debug_task(void);
 atask_st debug_th       =     {"Debug Task     ", 2000,    0,     0,  255,    0,  1,  print_debug_task };
@@ -54,17 +57,15 @@ void setup() {
     //Serial1.begin(115200);
     atask_initialize();
     msg_initialize();
-    while(true) delay(100);    
-
     modem69_initialize();
-    atask_add_new(&debug_th);
+    //atask_add_new(&debug_th);
     lte_initialize();
 }
 
 
 void setup1(){
     io_initialize();
-    ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
+    main_ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
 }
 
 void loop() 
@@ -73,7 +74,7 @@ void loop()
     if (!lte_msg.available){
         uint16_t len = lte_read_line(lte_msg.message, MSG_LEN, 1000);
         if (len > 0){
-            Serial.printf("Message len: %d:<%s>\n", len, lte_msg.message);
+            Serial.printf("Message len: %d body: %s\n", len, lte_msg.body);
         }
     }
 
@@ -81,8 +82,8 @@ void loop()
 
 void loop1()
 {
-    if(millis() > ctrl.next_io_tick){
-        ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
+    if(millis() > main_ctrl.next_io_tick){
+        main_ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
         io_task();
     }
 }

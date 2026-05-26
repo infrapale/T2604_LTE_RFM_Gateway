@@ -317,3 +317,8 @@ void handler_task(void)
             break;
     }
 }
+
+void modem69_radiate(char *msg)
+{
+    rfm69_modem.radiate(msg);
+}

@@ -3,6 +3,8 @@
 #include "WString.h"
 #define   __APP__ ((char*)"T2604_LTE_RFM_Gateway")
 
+#define  MY_ADDR_LEN    8
+
 // WiFi Access Point
 #define PIRPANA
 // #define LILLA_ASTRID
@@ -35,6 +37,7 @@
 typedef struct
 {
     uint32_t next_io_tick;
+    char my_addr[MY_ADDR_LEN];
 } main_ctrl_st;
 
 
@@ -43,6 +46,7 @@ typedef struct
     char            tag;
     char            addr;         
 } modem_data_st;
+
 
 
 
