@@ -75,15 +75,16 @@ UART Command Syntax
       <R;MH1;TK1;KOK1;1;KOK2;0;KOK3;1>
       <R;TK1;ET1;0;TUP1;1;TUP2;1>
       <R;TK1;ET1;0;TUP1;1;TUP2;1>
-      <R;RANTA;PUMP;0>                  switch off the water/air pump
-      <R;RANTA;PUMP;1>                  switch on the water/air pump
-      <R;RANTA;PUMP;3600>               switch on the water/air pump for 1 hour
-      <C;KOTONA;n>                      set home mode = n  (TBD)
+      <R;RANTA;KHH1;PUMP;0>               switch off the water/air pump
+      <R;RANTA;KHH1;PUMP;1>               switch on the water/air pump
+      <R;RANTA;SMS1;PUMP;60>              switch on the water/air pump for 1 hour
+      <C;#;TK1;KOTONA;n>                  et home mode = n  (TBD)
       <S;#;PIHA1;T;-12.3;H;44;L;2344>
       <S;#;RANTA;T;22.3;W;13.4;l;876>
       <A;#;PIHA2;PIR1;1;PIR2;0>
       <A;#;TK1;OVI1;1>
       <A;#;TK1;OVI1;?>
+      <T;#;PING;2026;05;25;09;59>
 
 *******************************************************************************
 

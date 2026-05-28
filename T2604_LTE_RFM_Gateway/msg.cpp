@@ -26,6 +26,7 @@ typedef enum
 {
     SMS_CMD_HOME = 0,
     SMS_CMD_RELAY_PUMP,
+    SMS_CMD_RELAY_PEER,
     SMS_CMD_SENSOR_PIHA1,
     SMS_CMD_SENSOR_REPO1,
     SMS_CMD_SENSOR_REPO2,
@@ -44,6 +45,7 @@ sms_cmd_st sms_cmd[SMS_CMD_NBR_OF] =
 {
     {"HOME",    SMS_CMD_HOME},
     {"PUMP",    SMS_CMD_RELAY_PUMP},
+    {"PEER",    SMS_CMD_RELAY_PEER},
     {"PIHA1",   SMS_CMD_SENSOR_PIHA1},
     {"REPO1",   SMS_CMD_SENSOR_REPO1},
     {"REPO2",   SMS_CMD_SENSOR_REPO2},
@@ -197,6 +199,11 @@ void msg_process_sms_cmd(void)
                 break;
             case SMS_CMD_RELAY_PUMP:
                 sprintf(buff,"<R;RANTA;%s;PUMP;%d>", main_ctrl.my_addr, param);
+                modem69_radiate(buff);
+                Serial.println(buff);
+                break;
+            case SMS_CMD_RELAY_PEER:
+                sprintf(buff,"<R;RANTA;%s;PEER;%d>", main_ctrl.my_addr, param);
                 modem69_radiate(buff);
                 Serial.println(buff);
                 break;
