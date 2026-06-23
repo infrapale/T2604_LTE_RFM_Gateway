@@ -175,7 +175,7 @@ size_t msg_set_sms_string(char *sms_str)
     Serial.printf(" ... %s\n", msg.raw);
     // msg_sub_print();
     return len;
-}
+} 
 
 void msg_process_sms_cmd(void)
 {

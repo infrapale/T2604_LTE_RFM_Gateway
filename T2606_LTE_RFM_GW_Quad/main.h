@@ -2,7 +2,7 @@
 #define __MAIN_H__
 #include "WString.h"
 #include <time.h>
-#define   __APP__ ((char*)"T2604_LTE_RFM_Gateway")
+#define   __APP__ ((char*)"T2606_LTE_RFM_GW_Quad")
 
 #define  MY_ADDR_LEN    8
 
