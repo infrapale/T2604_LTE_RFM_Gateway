@@ -1,7 +1,9 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include "atask.h"
 #include "main.h"
 #include "io.h"
+#include "super.h"
 
 typedef struct
 {
@@ -21,7 +23,7 @@ typedef struct
 
 io_ctrl_st io_ctrl;
 
-led_st led[COLOR_NBR_OF] =
+led_st led[LED_NBR_OF] =
 {
     {PIN_LED_RED, 0, 0, false},
     {PIN_LED_BLUE, 0, 0, false},
@@ -53,6 +55,24 @@ void io_task(void);
 //                                  123456789012345   ival  next  state  prev  cntr flag  call backup
 atask_st io_task_handle       =   {"I/O Task       ", 100,     0,     0,  255,    0,  1,  io_task };
 
+void io_rfm69_spi0_initialize(void) 
+{
+    SPI.setRX(PIN_RFM_MISO);
+    SPI.setTX(PIN_RFM_MOSI);
+    SPI.setSCK(PIN_RFM_SCK);
+    SPI.setCS(PIN_RFM_CS);
+    pinMode(PIN_RFM_RESET,OUTPUT);
+    digitalWrite(PIN_RFM_RESET,LOW);
+    SPI.begin();
+
+    SPI.beginTransaction(SPISettings(
+        1000000,      // 8 MHz
+        MSBFIRST,
+        SPI_MODE0
+    ));
+}
+
+
 void io_initialize(void)
 {
   analogReadResolution(12);
@@ -64,7 +84,7 @@ void io_initialize(void)
   pinMode(PIN_RESET, OUTPUT);
 
   io_ctrl.pattern_bit = 0;
-  for (uint8_t i = COLOR_RED; i <= COLOR_BLUE; i++)
+  for (uint8_t i = LED_RED; i <= LED_BLUE; i++)
   {
     pinMode(led[i].pin, OUTPUT);
     digitalWrite(led[i].pin, LOW);
@@ -86,7 +106,7 @@ void io_task_initialize(void)
 }
 
 
-void io_led_flash(color_et color, blink_et bindx, uint16_t tick_nbr)
+void io_led_flash(LED_et color, blink_et bindx, uint16_t tick_nbr)
 {
   led[color].pattern = led_pattern[bindx];
   led[color].tick_nbr = tick_nbr;
@@ -100,7 +120,7 @@ void io_task(void)
 {
 
     uint32_t patt = 1UL << io_ctrl.pattern_bit;
-    for (uint8_t i = COLOR_RED; i <= COLOR_BLUE; i++)
+    for (uint8_t i = LED_RED; i <= LED_BLUE; i++)
     {
         if (led[i].enable){
             if ((led[i].tick_nbr > 0) || led[i].forever) {
@@ -116,4 +136,10 @@ void io_task(void)
         }
     } 
     if (++io_ctrl.pattern_bit >= 32) io_ctrl.pattern_bit = 0;
+    super_clear_cntr(SUPER_CNTR_IO);
+}
+
+bool io_wd_is_enabled(void)
+{
+    return (digitalRead(PIN_WD_ENABLE) == 0);
 }

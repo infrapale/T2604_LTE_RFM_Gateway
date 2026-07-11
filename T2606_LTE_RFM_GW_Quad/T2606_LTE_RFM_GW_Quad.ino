@@ -4,15 +4,17 @@
 
 https://github.com/infrapale/T2604_LTE_RFM_Gateway.git
 *************************************************************************/
-
+#include    <SPI.h>
 #include    "main.h"
 #include    "secrets.h"
 //#include    <RH_RF69.h>
-#include    "Rfm69Modem.h"
+#include    "r69.h"
 #include    "atask.h"
 #include    "io.h"
 #include    "lte.h"
 #include    "msg.h"
+#include    "sensor.h"
+#include    "super.h"
 
 
 #define IO_TICK_INTERVAL    (100)
@@ -57,15 +59,18 @@ void setup() {
     //Serial1.begin(115200);
     atask_initialize();
     msg_initialize();
-    modem69_initialize();
-    //atask_add_new(&debug_th);
+    r69_initialize();
+    atask_add_new(&debug_th);
     lte_initialize();
+    sensor_initialize();
 }
 
 
 void setup1(){
     io_initialize();
+    super_initialize();
     main_ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
+    main_ctrl.next_super_tick = millis() + SUPER_TASK_INTERVAL_MS;
 }
 
 void loop() 
@@ -77,15 +82,24 @@ void loop()
             Serial.printf("Message len: %d body: %s\n", len, lte_msg.body);
         }
     }
-
+    super_clear_cntr(SUPER_CNTR_LOOP);
  }
 
 void loop1()
 {
+    // IO (blink) Task
     if(millis() > main_ctrl.next_io_tick){
         main_ctrl.next_io_tick = millis() + IO_TICK_INTERVAL;
         io_task();
     }
+
+    // Supervisor Task
+    if(millis() > main_ctrl.next_super_tick){
+        main_ctrl.next_super_tick = millis() + SUPER_TASK_INTERVAL_MS;
+        super_task();  
+    }
+     
+    
 }
 
 

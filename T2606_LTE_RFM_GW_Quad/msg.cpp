@@ -5,7 +5,7 @@
 #include <time.h>
 #include "main.h"
 #include "msg.h"
-#include "modem69.h"
+#include "r69.h"
 #include "atask.h"
 
 #define MSG_MAX_FIELDS          20
@@ -181,7 +181,7 @@ void msg_process_sms_cmd(void)
 {
     int cmd_indx = -1; 
     int16_t param;
-    char    buff[RFM69_MAX_LEN];
+    char    buff[ R69_MSG_SIZE];
 
     Serial.println("msg_process_sms_cmd");
     for(uint8_t i = 0; ((i < SMS_CMD_NBR_OF) && (cmd_indx == -1)); i++)
@@ -200,12 +200,12 @@ void msg_process_sms_cmd(void)
                 break;
             case SMS_CMD_RELAY_PUMP:
                 sprintf(buff,"<R;RANTA;%s;PUMP;%d>", main_ctrl.my_addr, param);
-                modem69_radiate(buff);
+                r69_send(buff);
                 Serial.println(buff);
                 break;
             case SMS_CMD_RELAY_PEER:
                 sprintf(buff,"<R;RANTA;%s;PEER;%d>", main_ctrl.my_addr, param);
-                modem69_radiate(buff);
+                r69_send(buff);
                 Serial.println(buff);
                 break;
             case SMS_CMD_SENSOR_PIHA1:

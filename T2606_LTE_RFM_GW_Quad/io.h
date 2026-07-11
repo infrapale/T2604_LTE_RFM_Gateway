@@ -40,6 +40,8 @@
 #define PIN_LDR_AN      (26u)
 #define PIN_ABTN        (27u)
 
+#define PIN_WD_ENABLE   PIN_DIP_SW1
+
 
 #define BLINK_DISABLE  (9998)
 #define BLINK_FOREVER  (9999)
@@ -47,10 +49,10 @@
 
 typedef enum
 {
-    COLOR_RED = 0,
-    COLOR_BLUE,
-    COLOR_NBR_OF
-} color_et;
+    LED_RED = 0,
+    LED_BLUE,
+    LED_NBR_OF
+} LED_et;
 
 typedef enum
 {
@@ -73,9 +75,12 @@ void io_initialize(void);
 
 void io_task_initialize(void);
 
-void io_led_flash(color_et color, blink_et bindx, uint16_t tick_nbr);
+void io_rfm69_spi0_initialize(void);
+
+void io_led_flash(LED_et color, blink_et bindx, uint16_t tick_nbr);
 
 void io_task(void);
 
+bool io_wd_is_enabled(void);
 
 #endif

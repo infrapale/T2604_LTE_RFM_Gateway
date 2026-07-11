@@ -19,8 +19,10 @@
 
 typedef struct
 {
-    uint8_t     task_indx;
-    char        buff[R69_MSG_SIZE];
+    uint8_t     tx_task_indx;
+    uint8_t     rx_task_indx;
+    char        txbuff[R69_MSG_SIZE];
+    char        rxbuff[R69_MSG_SIZE];
     bool        send_avail;
     uint16_t    duration;
     uint16_t    not_send_before;
@@ -41,10 +43,12 @@ void modem_task(void)
 }
 
 
-void r69_task(void);
-atask_st r69_th                = {"RFM69 Task     ", 100,0, 0, 255, 0, 1, r69_task};
+void r69_tx_task(void);
+void r69_rx_task(void);
+
+atask_st tx_th                 = {"RFM69 Send     ", 100,0, 0, 255, 0, 1, r69_tx_task};
+atask_st rx_th                 = {"RFM69 Receive  ", 100,0, 0, 255, 0, 1, r69_rx_task};
 atask_st modem_th              = {"Radio Modem    ", 100,0, 0, 255, 0, 1, modem_task};
-//atask_st modem_th            = {"Radio Modem    ", 100,0, 0, 255, 0, 1, modem_task};
 
 void r69_initialize(void)
 {
@@ -56,7 +60,8 @@ void r69_initialize(void)
     rfm69_modem.radiate(__APP__);
 
     atask_add_new(&modem_th);
-    r69.task_indx =  atask_add_new(&r69_th);
+    r69.tx_task_indx =  atask_add_new(&tx_th);
+    r69.rx_task_indx =  atask_add_new(&rx_th);
     
     // rfm69_modem.radiate(__APP__);
 
@@ -70,7 +75,7 @@ void debug_cb_print(const char *msg)
 
 void r69_send(char *buff)
 {
-    memcpy(r69.buff, buff, R69_MSG_SIZE);
+    memcpy(r69.txbuff, buff, R69_MSG_SIZE);
     r69.send_avail = true;
 }
 
@@ -83,33 +88,62 @@ bool r69_ready_to_send(void)
 // sensor_node_et sensor_node_send(void)
 // SENSOR_NODE_UNDEFINED
 
-void r69_task(void)
+void r69_tx_task(void)
 {
  
-    switch(r69_th.state)
+    switch(tx_th.state)
     {
         case 0:
-            r69_th.state = 10;
+            tx_th.state = 10;
             break;
         case 10:
-            if(r69.send_avail) r69_th.state = 20;
+            if(r69.send_avail) tx_th.state = 20;
             break;
         case 20:
-            rfm69_modem.radiate(r69.buff);
+            rfm69_modem.radiate(r69.txbuff);
             r69.not_send_before = millis() + MIN_SEND_INTERVAL;
-            r69_th.state = 30;
+            tx_th.state = 30;
             break;
         case 30:
             if(millis() > r69.not_send_before){
-                r69_th.state = 10;
+                tx_th.state = 10;
                 r69.send_avail = false;
             }
             break;
         case 40:
-            r69_th.state = 10;
+            tx_th.state = 10;
             break;
 
     }
     super_clear_cntr(SUPER_CNTR_R69);
 
+}
+
+void r69_rx_task(void)
+{
+ 
+    switch(rx_th.state)
+    {
+        case 0:
+            rx_th.state = 10;
+            break;
+        case 10:
+            if(rfm69_modem.msg_is_avail())
+            {
+                rfm69_modem.get_msg(r69.rxbuff, R69_MSG_SIZE, true);
+                Serial.println(r69.rxbuff);
+                rx_th.state = 20;
+            }
+            break;
+        case 20:
+            rx_th.state = 10;
+            break;
+        case 30:
+            rx_th.state = 10;
+            break;
+        case 40:
+            rx_th.state = 10;
+            break;
+
+    }
 }

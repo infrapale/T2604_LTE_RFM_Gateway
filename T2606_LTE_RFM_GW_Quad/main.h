@@ -16,12 +16,8 @@
 
 #define DEBUG_PRINT 
 #define SEND_TEST_MSG 
-//#define ADA_M0_RFM69 
-//#define ADA_PICO_FEATHER
 #define T2601_PICO_RFM69
-//#define PRO_MINI_RFM69
 #include <Arduino.h>
-#include "modem69.h"
 
 #ifdef  ADA_M0_RFM69
 #define SerialX  Serial1
@@ -38,6 +34,7 @@
 typedef struct
 {
     uint32_t next_io_tick;
+    uint32_t next_super_tick;
     char my_addr[MY_ADDR_LEN];
     struct tm timeinfo;
 } main_ctrl_st;

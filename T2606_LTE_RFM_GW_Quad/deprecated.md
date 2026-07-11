@@ -293,7 +293,7 @@ void handler_task(void)
         case 10:
             if(rfm69_modem.msg_is_avail())
             {
-                io_led_flash(COLOR_BLUE, BLINK_JITTER_1, 40);
+                io_led_flash(LED_BLUE, BLINK_JITTER_1, 40);
                 rfm69_modem.get_msg(hctrl.rx_mbuff, BUFF_LEN, false); 
 
                 switch(hctrl.rx_mbuff[0])
@@ -335,7 +335,7 @@ void handler_task(void)
             break;
         case 100:    
             hth.state = 10;
-            io_led_flash(COLOR_RED, BLINK_NORMAL, 20);
+            io_led_flash(LED_RED, BLINK_NORMAL, 20);
             break;
     }
 }
@@ -899,9 +899,9 @@ void lte_task(void)
             lte.wait_until = millis() + 3200;
             Serial.println("=== Pico 2 W + A7683E SMS Framework ===");
 
-            // io_led_flash(COLOR_BLUE, BLINK_JITTER_1, 40);            
-            // io_led_flash(COLOR_YELLOW, BLINK_JITTER_2, 40);            
-            // io_led_flash(COLOR_RED, BLINK_JITTER_3, 40);
+            // io_led_flash(LED_BLUE, BLINK_JITTER_1, 40);            
+            // io_led_flash(LED_YELLOW, BLINK_JITTER_2, 40);            
+            // io_led_flash(LED_RED, BLINK_JITTER_3, 40);
             break;
         case 10:
             Serial.println("[ACTION] Resetting modem…");
