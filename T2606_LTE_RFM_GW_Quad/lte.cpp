@@ -176,7 +176,7 @@ bool lte_parse_message(void)
         if (len < sizeof(lte_msg.sender))
             memcpy(lte_msg.sender, p + 1, len);
 
-        //Serial.printf("[INFO] Sender: %s", lte_msg.sender);
+        Serial.printf("[INFO] Sender: %s\n", lte_msg.sender);
 
         // Timestamp: 26/04/22,11:08:12+12
         // Find timestamp (4th quoted field)
@@ -250,12 +250,16 @@ bool lte_parse_message(void)
         } else parse_res = false;
         //Serial.print("[INFO] Timestamp: "); Serial.println(lte_msg.timestamp);
 
-        // strncpy(lte_msg->sender, sender, sizeof(lte_msg->sender));
+        //strncpy(lte_msg.sender, sender, sizeof(lte_msg->sender));
         // strncpy(lte_msg->timestamp, timestamp, sizeof(lte_msg->timestamp));
     } else parse_res = false;
     return parse_res;
 }
 
+char *lte_get_sender_nbr(void)
+{
+    return lte_msg.sender;
+}
 
 void lte_reply_msg(lte_msg_st *lte_msg)
 { 
@@ -290,6 +294,40 @@ void lte_reply_msg(lte_msg_st *lte_msg)
     Serial.printf("Reply: %s\n", reply);
 }
 
+
+void lte_send_msg(char *to_nbr, char *sms_msg)
+{
+    //char reply[SMS_LEN] = {0};
+    char at_cmd[40];
+
+    // uint16_t ch_avail = SMS_LEN;
+    // char *cp;
+    // uint16_t  len;
+
+    // strncpy(reply,"Terve ", ch_avail);
+    // ch_avail = SMS_LEN - strlen(reply);
+
+    // cp = contact_list[lte_msg->contact_indx].name;
+    // len = strlen(cp);
+    // if (ch_avail > len) {
+    //     strncat(reply, cp, ch_avail);
+    //     ch_avail = SMS_LEN - strlen(reply);
+    // }
+
+    // cp = (char*)"  Tupa Temp = 22.3C";
+    // len = strlen(cp);
+    // if (ch_avail > len) {
+    //     strncat(reply, cp, ch_avail);
+    //     ch_avail = SMS_LEN - strlen(reply);
+    // }
+
+    Serial.printf("To nbr: %s\n", to_nbr);
+    sprintf(at_cmd, "AT+CMGS=\"%s\"", to_nbr);
+    lte_send_at(at_cmd);
+    LteSerial.print(sms_msg);
+    LteSerial.write(26);
+    Serial.printf("SMS Sent: %s to %s\n", sms_msg, to_nbr);
+}
 
 // ------------------------------------------------------------
 // Modem Boot Sequence

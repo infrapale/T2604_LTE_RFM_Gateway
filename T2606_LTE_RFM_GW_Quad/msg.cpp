@@ -6,41 +6,14 @@
 #include "main.h"
 #include "msg.h"
 #include "r69.h"
+#include "lte.h"
 #include "atask.h"
-
-#define MSG_MAX_FIELDS          20
-#define MSG_MAX_FIELD_LEN       16
-#define MSG_MAX_RAW_MSG_LEN     200
-#define MSG_MAX_SMS_CMD_LEN     8
+#include "sensor.h"
 
 
-typedef struct 
-{
-    char        raw[MSG_MAX_RAW_MSG_LEN];
-    msg_from_et from;
-    char        fields[MSG_MAX_FIELDS][MSG_MAX_FIELD_LEN];
-    uint8_t     field_count;
-} msg_st;
-
-
-typedef enum
-{
-    SMS_CMD_HOME = 0,
-    SMS_CMD_RELAY_PUMP,
-    SMS_CMD_RELAY_PEER,
-    SMS_CMD_SENSOR_PIHA1,
-    SMS_CMD_SENSOR_REPO1,
-    SMS_CMD_SENSOR_REPO2,
-    SMS_CMD_NBR_OF
-} sms_cmd_type_et;
-
-typedef struct
-{
-    char cmd[MSG_MAX_SMS_CMD_LEN];
-    sms_cmd_type_et type;
-} sms_cmd_st;
 
 extern main_ctrl_st main_ctrl;
+extern sensor_st sensor[SENSOR_NBR_OF];
 
 sms_cmd_st sms_cmd[SMS_CMD_NBR_OF] =
 {
@@ -96,8 +69,8 @@ int msg_strip_to_raw(char *msg_inp)
     return len;
 }
 
-uint8_t msg_split(char *msg_inp, char separator = ';') {
-
+uint8_t msg_split(char *msg_inp,  char separator = ';') 
+{
     // Serial.print("sg_split() ");
     // Must start with '<' and end with '>'
 
@@ -127,7 +100,6 @@ uint8_t msg_split(char *msg_inp, char separator = ';') {
                 msg.fields[f][p++] = c;
             }
         }
-
         i++;
     }
 
@@ -138,6 +110,7 @@ uint8_t msg_split(char *msg_inp, char separator = ';') {
     }
 
     // Serial.printf("..end return %d\n",f);
+    msg.field_count = f;
     return f;
 }
 
@@ -148,6 +121,20 @@ void msg_sub_print(void)
         Serial.printf("[%d] = %s\n", i, msg.fields[i]);
     }
 }
+
+// <S;PIHA1;T;25.3;H;43;L;9>
+// Split nbr 8
+// Message fields; 8
+// [0] = S
+// [1] = PIHA1
+// [2] = T
+// [3] = 25.3
+// [4] = H
+// [5] = 43
+// [6] = L
+// [7] = 9
+
+
 
 void msg_relay_action()
 {
@@ -213,8 +200,12 @@ void msg_process_sms_cmd(void)
                 Serial.println(buff);
                 break;
             case SMS_CMD_SENSOR_REPO1:
-                sprintf(buff,"<S;#;OD1;T;22.3;W;13.4;l;876>");
+                sprintf(buff,"OD: %0.1fC, Tupa: %0.1fC, KHH: %0.1fC, Vesi: %0.1fC,",
+                    sensor[SENSOR_PIHA1].temperature,
+                    22.3f, 25.2f,14.2f
+                );
                 Serial.println(buff);
+                lte_send_msg(lte_get_sender_nbr(), buff);
                 break;
             case SMS_CMD_SENSOR_REPO2:
                 sprintf(buff,"<S;#;REPO2;T;22.3;W;13.4;l;876>");

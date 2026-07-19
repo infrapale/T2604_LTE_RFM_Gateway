@@ -67,7 +67,11 @@ typedef struct
 } contact_st;
 
 void lte_initialize(void);
+
 uint16_t lte_read_line(char *lp, uint16_t max_len, uint32_t timeout);
 
+char *lte_get_sender_nbr(void);
+
+void lte_send_msg(char *to_nbr, char *sms_msg);
 
 #endif

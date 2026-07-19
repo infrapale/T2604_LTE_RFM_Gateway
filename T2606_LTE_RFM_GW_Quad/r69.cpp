@@ -4,6 +4,7 @@
 #include    <RH_RF69.h>
 #include    "modem69.h"
 #include    "atask.h"
+#include    "msg.h"
 #include    "io.h"
 #include    "r69.h"
 #include    "sensor.h"
@@ -17,24 +18,14 @@
 #define MIN_SEND_INTERVAL   (2000)
 
 
-typedef struct
-{
-    uint8_t     tx_task_indx;
-    uint8_t     rx_task_indx;
-    char        txbuff[R69_MSG_SIZE];
-    char        rxbuff[R69_MSG_SIZE];
-    bool        send_avail;
-    uint16_t    duration;
-    uint16_t    not_send_before;
-
-} r69_st;
-
 uint8_t key[] = RFM69_KEY;
 
 RH_RF69         rf69(PIN_RFM_CS, PIN_RFM_IRQ);
 Modem69         rfm69_modem(&rf69,  PIN_RFM_RESET);
 
 extern main_ctrl_st main_ctrl;
+// extern msg_st msg;
+
 r69_st r69 = {0};
 
 void modem_task(void)
@@ -121,7 +112,7 @@ void r69_tx_task(void)
 
 void r69_rx_task(void)
 {
- 
+
     switch(rx_th.state)
     {
         case 0:
@@ -132,6 +123,10 @@ void r69_rx_task(void)
             {
                 rfm69_modem.get_msg(r69.rxbuff, R69_MSG_SIZE, true);
                 Serial.println(r69.rxbuff);
+                //msg_split(r69.rxbuff,';');
+                // Serial.printf("Split nbr %d\n",msg.field_count);
+                // msg_sub_print();
+                sensor_process_msg();
                 rx_th.state = 20;
             }
             break;
