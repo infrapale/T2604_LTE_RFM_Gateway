@@ -297,31 +297,9 @@ void lte_reply_msg(lte_msg_st *lte_msg)
 
 void lte_send_msg(char *to_nbr, char *sms_msg)
 {
-    //char reply[SMS_LEN] = {0};
     char at_cmd[40];
 
-    // uint16_t ch_avail = SMS_LEN;
-    // char *cp;
-    // uint16_t  len;
-
-    // strncpy(reply,"Terve ", ch_avail);
-    // ch_avail = SMS_LEN - strlen(reply);
-
-    // cp = contact_list[lte_msg->contact_indx].name;
-    // len = strlen(cp);
-    // if (ch_avail > len) {
-    //     strncat(reply, cp, ch_avail);
-    //     ch_avail = SMS_LEN - strlen(reply);
-    // }
-
-    // cp = (char*)"  Tupa Temp = 22.3C";
-    // len = strlen(cp);
-    // if (ch_avail > len) {
-    //     strncat(reply, cp, ch_avail);
-    //     ch_avail = SMS_LEN - strlen(reply);
-    // }
-
-    Serial.printf("To nbr: %s\n", to_nbr);
+    // Serial.printf("To nbr: %s\n", to_nbr);
     sprintf(at_cmd, "AT+CMGS=\"%s\"", to_nbr);
     lte_send_at(at_cmd);
     LteSerial.print(sms_msg);

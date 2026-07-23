@@ -202,7 +202,9 @@ void msg_process_sms_cmd(void)
             case SMS_CMD_SENSOR_REPO1:
                 sprintf(buff,"OD: %0.1fC, Tupa: %0.1fC, KHH: %0.1fC, Vesi: %0.1fC,",
                     sensor[SENSOR_PIHA1].temperature,
-                    22.3f, 25.2f,14.2f
+                    sensor[SENSOR_KHH].temperature,
+                    sensor[SENSOR_KHH].temperature,
+                    14.2f
                 );
                 Serial.println(buff);
                 lte_send_msg(lte_get_sender_nbr(), buff);

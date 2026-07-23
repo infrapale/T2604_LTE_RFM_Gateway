@@ -31,7 +31,7 @@ typedef enum
     SENSOR_UNDEFINED,
     SENSOR_PIHA1,
     SENSOR_RANTA,
-    SENSOR_1,
+    SENSOR_KHH,
     SENSOR_NBR_OF,
 } sensor_et;
 

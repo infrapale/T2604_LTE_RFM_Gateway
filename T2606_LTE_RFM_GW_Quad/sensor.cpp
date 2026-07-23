@@ -42,7 +42,7 @@ sensor_st sensor[SENSOR_NBR_OF] =
     [SENSOR_UNDEFINED]  = {"Undef", 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false},
     [SENSOR_PIHA1]      = {"PIHA1", 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false},
     [SENSOR_RANTA]      = {"RANTA", 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false},
-    [SENSOR_1]          = {"SENSOR1", 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false}
+    [SENSOR_KHH]        = {"KHH",   0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false}
 };
 
 void sensor_print(uint8_t sindx)
@@ -148,7 +148,8 @@ void sensor_process_msg(void)
             case SENSOR_RANTA:
                 sensor_save_values(sindx);
                 break;
-            case SENSOR_1:
+            case SENSOR_KHH:
+                sensor_save_values(sindx);
                 break;
         }
     }
