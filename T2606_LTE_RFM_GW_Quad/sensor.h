@@ -61,5 +61,6 @@ typedef struct
 
 void sensor_initialize(void);
 
-void sensor_process_msg(void);
+void sensor_process_msg(uint8_t nbr_fields);
+
 #endif

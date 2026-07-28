@@ -24,7 +24,7 @@ RH_RF69         rf69(PIN_RFM_CS, PIN_RFM_IRQ);
 Modem69         rfm69_modem(&rf69,  PIN_RFM_RESET);
 
 extern main_ctrl_st main_ctrl;
-// extern msg_st msg;
+extern msg_st msg;
 
 r69_st r69 = {0};
 
@@ -112,7 +112,7 @@ void r69_tx_task(void)
 
 void r69_rx_task(void)
 {
-
+    uint8_t nbr_fields = 0;
     switch(rx_th.state)
     {
         case 0:
@@ -123,10 +123,21 @@ void r69_rx_task(void)
             {
                 rfm69_modem.get_msg(r69.rxbuff, R69_MSG_SIZE, true);
                 Serial.println(r69.rxbuff);
-                //msg_split(r69.rxbuff,';');
-                // Serial.printf("Split nbr %d\n",msg.field_count);
-                // msg_sub_print();
-                sensor_process_msg();
+                nbr_fields = msg_split(r69.rxbuff,';');
+                Serial.printf("Split nbr %d\n",nbr_fields);
+                msg_sub_print();
+                switch (msg.fields[0][0])
+                {
+                    case 'S':
+                        sensor_process_msg(nbr_fields);
+                        break;
+                    case 'T':
+                        Serial.println("Time message:");
+                        msg_time_action();
+                        break;
+                    default:
+                        break;   
+                }   
                 rx_th.state = 20;
             }
             break;

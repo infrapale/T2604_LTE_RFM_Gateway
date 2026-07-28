@@ -127,31 +127,35 @@ uint8_t sensor_save_values(uint8_t sindx)
 
 } 
 
-void sensor_process_msg(void)
+void sensor_process_msg(uint8_t  nbr_fields)
 {
-    uint8_t  nbr_fields =0;
+    uint8_t sindx = SENSOR_UNDEFINED;
 
-    nbr_fields = msg_split(r69.rxbuff,';');
-    Serial.printf("Split nbr %d\n",nbr_fields);
-    msg_sub_print();
+    // Serial.printf("Split nbr %d\n",nbr_fields);
+    // msg_sub_print();
 
-    if(msg.fields[0][0] == 'S')
+    switch(msg.fields[0][0])
     {
-        uint8_t sindx = sensor_find_label(msg.fields[1]);
-        switch(sindx)
-        {
-            case SENSOR_UNDEFINED:
-                break;
-            case SENSOR_PIHA1:
-                sensor_save_values(sindx);
-                break;
-            case SENSOR_RANTA:
-                sensor_save_values(sindx);
-                break;
-            case SENSOR_KHH:
-                sensor_save_values(sindx);
-                break;
-        }
+        case 'S':
+            sindx = sensor_find_label(msg.fields[1]);
+            switch(sindx)
+            {
+                case SENSOR_UNDEFINED:
+                    break;
+                case SENSOR_PIHA1:
+                    sensor_save_values(sindx);
+                    break;
+                case SENSOR_RANTA:
+                    sensor_save_values(sindx);
+                    break;
+                case SENSOR_KHH:
+                    sensor_save_values(sindx);
+                    break;
+            }
+            break;
+        case 'T':
+            break;
+         
     }
     
 

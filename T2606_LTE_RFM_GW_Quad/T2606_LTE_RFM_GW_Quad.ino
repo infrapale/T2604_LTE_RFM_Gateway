@@ -15,6 +15,7 @@ https://github.com/infrapale/T2604_LTE_RFM_Gateway.git
 #include    "msg.h"
 #include    "sensor.h"
 #include    "super.h"
+#include    "clock.h"
 
 
 #define IO_TICK_INTERVAL    (100)
@@ -58,9 +59,10 @@ void setup() {
     delay(1500);
     //Serial1.begin(115200);
     atask_initialize();
+    clock_initialize();
     msg_initialize();
     r69_initialize();
-    atask_add_new(&debug_th);
+    //atask_add_new(&debug_th);
     lte_initialize();
     sensor_initialize();
 }

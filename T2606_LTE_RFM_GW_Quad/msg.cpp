@@ -9,6 +9,7 @@
 #include "lte.h"
 #include "atask.h"
 #include "sensor.h"
+#include "clock.h"
 
 
 
@@ -149,6 +150,23 @@ void str_to_upper(char str[]) {
         i++;
     }
 }
+
+
+uint32_t msg_robust_atoi(const char *s, uint8_t *err_cntr, int max, int min )
+{
+    char *endptr;
+    long val = 0;
+
+    if (s == NULL) *err_cntr++;
+    if (*err_cntr == 0) val = strtol(s, &endptr, 10);
+    if (endptr == s) *err_cntr++;
+    if (val > max)  *err_cntr++;
+    if (val < min)  *err_cntr++;
+    if (*err_cntr > 0) val = 0;
+    return val;
+}
+
+
 size_t msg_set_sms_string(char *sms_str)
 {
     str_to_upper(sms_str);
@@ -163,6 +181,20 @@ size_t msg_set_sms_string(char *sms_str)
     // msg_sub_print();
     return len;
 } 
+
+void msg_send_repo1(void)
+{
+    char    buff[ R69_MSG_SIZE];
+
+    sprintf(buff,"OD: %0.1fC, Tupa: %0.1fC, KHH: %0.1fC, Vesi: %0.1fC,",
+        sensor[SENSOR_PIHA1].temperature,
+        sensor[SENSOR_KHH].temperature,
+        sensor[SENSOR_KHH].temperature,
+        14.2f
+    );
+    Serial.println(buff);
+    lte_send_msg(lte_get_sender_nbr(), buff);
+}
 
 void msg_process_sms_cmd(void)
 {
@@ -200,14 +232,7 @@ void msg_process_sms_cmd(void)
                 Serial.println(buff);
                 break;
             case SMS_CMD_SENSOR_REPO1:
-                sprintf(buff,"OD: %0.1fC, Tupa: %0.1fC, KHH: %0.1fC, Vesi: %0.1fC,",
-                    sensor[SENSOR_PIHA1].temperature,
-                    sensor[SENSOR_KHH].temperature,
-                    sensor[SENSOR_KHH].temperature,
-                    14.2f
-                );
-                Serial.println(buff);
-                lte_send_msg(lte_get_sender_nbr(), buff);
+                msg_send_repo1();
                 break;
             case SMS_CMD_SENSOR_REPO2:
                 sprintf(buff,"<S;#;REPO2;T;22.3;W;13.4;l;876>");
@@ -223,12 +248,24 @@ void msg_process_sms_cmd(void)
 
 void  msg_time_action(void)
 {
-    Serial.printf("Time: %s\n", msg.raw);
-    main_ctrl.timeinfo.tm_year  = atoi(msg.fields[3]);
-    main_ctrl.timeinfo.tm_mon   = (uint8_t)atoi(msg.fields[4]);    
-    main_ctrl.timeinfo.tm_mday  = (uint8_t)atoi(msg.fields[5]);
-    main_ctrl.timeinfo.tm_hour  = (uint8_t)atoi(msg.fields[6]);
-    main_ctrl.timeinfo.tm_min   = (uint8_t)atoi(msg.fields[7]);
+    // uint8_t errors = 0;
+    // Serial.printf("Time: %s\n", msg.raw);
+    // if((msg.field_count == 8) && (msg.fields[1][0] == '#'))
+    // {
+    //     main_ctrl.timeinfo.tm_year  = (uint16_t)msg_robust_atoi(msg.fields[3],&errors,2000,2100) -1900;    
+    //     main_ctrl.timeinfo.tm_mon   = (uint8_t)msg_robust_atoi(msg.fields[4],&errors,1,12);    
+    //     main_ctrl.timeinfo.tm_mday  = (uint8_t)msg_robust_atoi(msg.fields[5],&errors,1,31);
+    //     main_ctrl.timeinfo.tm_hour  = (uint8_t)msg_robust_atoi(msg.fields[6],&errors,0,24);
+    //     main_ctrl.timeinfo.tm_min   = (uint8_t)msg_robust_atoi(msg.fields[7],&errors,0,60);
+    //     Serial.printf("time errors %d\n",errors);
+    //     if (errors==0) clock_set_date_time();
+    //     else Serial.println("!!!msg_time_action: Integer conversion Error");
+    // }
+    // else {
+    //     Serial.println("Incorrect Time message");
+    // }
+
+    clock_set_date_time();
 }
 
 void msg_process(msg_from_et from, char *raw_msg )
