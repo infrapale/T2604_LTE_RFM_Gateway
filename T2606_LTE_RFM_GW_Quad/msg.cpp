@@ -152,7 +152,7 @@ void str_to_upper(char str[]) {
 }
 
 
-uint32_t msg_robust_atoi(const char *s, uint8_t *err_cntr, int max, int min )
+uint32_t msg_robust_atoi(const char *s, uint8_t *err_cntr, int min, int max)
 {
     char *endptr;
     long val = 0;
@@ -163,6 +163,7 @@ uint32_t msg_robust_atoi(const char *s, uint8_t *err_cntr, int max, int min )
     if (val > max)  *err_cntr++;
     if (val < min)  *err_cntr++;
     if (*err_cntr > 0) val = 0;
+    Serial.printf("%s %d !%d! ",s,val, *err_cntr );
     return val;
 }
 
@@ -308,7 +309,8 @@ void msg_process(msg_from_et from, char *raw_msg )
                     msg_relay_action();
                     break;
                 case 'T':
-                    msg_time_action();
+                    //msg_time_action();
+                    clock_set_date_time();
                 default:
                     break;    
             }

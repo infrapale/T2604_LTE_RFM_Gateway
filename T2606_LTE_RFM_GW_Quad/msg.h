@@ -47,7 +47,7 @@ void msg_initialize(void);
 
 bool msg_is_valid_char(char c);
 
-uint32_t msg_robust_atoi(const char *s, uint8_t *err_cntr, int max, int min );
+uint32_t msg_robust_atoi(const char *s, uint8_t *err_cntr, int min, int max );
 
 uint8_t msg_split(char *msg_inp,  char separator ); 
 

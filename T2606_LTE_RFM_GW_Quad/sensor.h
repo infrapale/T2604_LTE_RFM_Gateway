@@ -17,14 +17,27 @@ typedef enum
 
 typedef enum
 {
-    UNIT_TYPE_UNDEFINED = 0,
-    UNIT_TYPE_TEMPERATURE,
+    UNIT_TYPE_TEMPERATURE = 0,
     UNIT_TYPE_HUMIDITY,
     UNIT_TYPE_PRESSURE,
     UNIT_TYPE_LUX,
     UNIT_TYPE_PIR,
-    UNIT_TYPE_FLOAT1
+    UNIT_TYPE_FLOAT1,
+    UNIT_TYPE_FLOAT2,
+    UNIT_TYPE_NBR_OF,
 } sensor_unit_type_et;
+
+typedef struct
+{
+    float value;
+    float min;
+    float max;
+    float average;
+    float daily_sum;
+    uint16_t    daily_cntr;
+    bool        updated;
+
+} sensor_value_st;
 
 typedef enum
 {
@@ -34,6 +47,17 @@ typedef enum
     SENSOR_KHH,
     SENSOR_NBR_OF,
 } sensor_et;
+
+typedef enum
+{
+    VALUE_TEMPERATURE = 0,
+    VALUE_HUMIDITY,
+    VALUE_LUX,
+    VALUE_PIR,
+    VALUE_1,
+    VALUE_2,
+    VALUE_NBR_OF
+}  value_et;
 
 typedef struct
 {
@@ -46,6 +70,15 @@ typedef struct
     float       value2;
     bool        updated;
 } sensor_st;
+
+typedef struct
+{
+    char        label[MAX_TOKEN_LEN];
+    sensor_value_st data[UNIT_TYPE_NBR_OF];
+    //bool        updated;
+} xsensor_st;
+
+
 
 
 

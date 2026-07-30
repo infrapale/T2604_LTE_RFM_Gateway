@@ -45,6 +45,26 @@ sensor_st sensor[SENSOR_NBR_OF] =
     [SENSOR_KHH]        = {"KHH",   0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false}
 };
 
+xsensor_st sensor_data[SENSOR_NBR_OF] = 
+{
+    [SENSOR_UNDEFINED]  = {
+        .label  = "Undef",
+        .data   = {0},
+    },
+    [SENSOR_PIHA1]      = {
+        .label  = "PIHA1",
+        .data   = {0},
+    },
+    [SENSOR_RANTA]      = {
+        .label  = "RANTA",
+        .data   = {0},
+    },
+    [SENSOR_KHH]        = {
+        .label  = "KHH",
+        .data   = {0},
+    },
+};    
+
 void sensor_print(uint8_t sindx)
 {
     Serial.printf("Sensor: %s: Temp: %0.2f Hum: %0.2f Lux: %0.2f Pir: %0.2f Value1: %0.2f Value2: %0.2f\n",
@@ -68,6 +88,11 @@ uint8_t sensor_find_label(char *label)
         }
     }
     return 0;   // default index if not found
+}
+
+void sensor_store_value(sensor_unit_type_et unit, float fval)
+{
+
 }
 
 uint8_t sensor_save_values(uint8_t sindx)

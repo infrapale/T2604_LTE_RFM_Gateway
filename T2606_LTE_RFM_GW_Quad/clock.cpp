@@ -40,16 +40,17 @@ void clock_initialize(void)
     clock_mgr.new_hour_event = false;
 }
 
-void clock_print_date_time(struct tm   *date_time)
-{
-    strftime(clock_mgr.buff, sizeof(clock_mgr.buff), "%Y-%m-%d %H:%M:%S (%Z)", date_time);
-    Serial.println(clock_mgr.buff);
+void clock_print_date_time(const struct tm *t)
+{ 
+    char buff[40];
+    strftime(buff, sizeof(buff), "%Y-%m-%d %H:%M:%S (%Z)", t);
+    Serial.println(buff);
     
 }
 
 void clock_set_date_time(void)
 {
-    struct tm   tmp_time;
+    struct tm   tmp_time = {0};
     Serial.println("clock_set_date_time");
 
     uint8_t errors = 0;
@@ -57,25 +58,26 @@ void clock_set_date_time(void)
     if((msg.field_count == 8) && (msg.fields[1][0] == '#'))
     {
         tmp_time.tm_year  = (uint16_t)msg_robust_atoi(msg.fields[3],&errors,2000,2100) -1900;    
-        tmp_time.tm_mon   = (uint8_t)msg_robust_atoi(msg.fields[4],&errors,1,12);    
+        tmp_time.tm_mon   = (uint8_t)msg_robust_atoi(msg.fields[4],&errors,0,11);    
         tmp_time.tm_mday  = (uint8_t)msg_robust_atoi(msg.fields[5],&errors,1,31);
-        tmp_time.tm_hour  = (uint8_t)msg_robust_atoi(msg.fields[6],&errors,0,24);
-        tmp_time.tm_min   = (uint8_t)msg_robust_atoi(msg.fields[7],&errors,0,60);
+        tmp_time.tm_hour  = (uint8_t)msg_robust_atoi(msg.fields[6],&errors,0,23);
+        tmp_time.tm_min   = (uint8_t)msg_robust_atoi(msg.fields[7],&errors,0,59);
+        tmp_time.tm_sec = 0;
+        tmp_time.tm_isdst = -1;
+        Serial.println();
         Serial.printf("time errors %d\n",errors);
+        clock_print_date_time(&tmp_time);
         if (errors==0) {
             time_t t = mktime(&tmp_time);
+            //clock_print_date_time(&t);
             clock_mgr.my_time = *localtime(&t);
+            clock_print_date_time(&clock_mgr.my_time);
         }
         else Serial.println("!!!msg_time_action: Integer conversion Error");
     }
     else {
         Serial.println("Incorrect Time message");
     }
-
-
-
-    strftime(clock_mgr.buff, sizeof(clock_mgr.buff), "%Y-%m-%d %H:%M:%S (%Z)", &clock_mgr.my_time);
-    Serial.println(clock_mgr.buff);
     clock_mgr.next_minute = millis() + 60000;
 }
 
