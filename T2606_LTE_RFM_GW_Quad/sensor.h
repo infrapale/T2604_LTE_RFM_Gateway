@@ -6,38 +6,28 @@
 
 typedef enum
 {
-    SENSOR_VALUE_TEMP   = 'T',
-    SENSOR_VALUE_HUM    = 'H',    
-    SENSOR_VALUE_PRESS  = 'P',
-    SENSOR_VALUE_LUX    = 'L',
-    SENSOR_VALUE_PIR    = 'N',   
-    SENSOR_VALUE_1      = '1',   
-    SENSOR_VALUE_2      = '2',   
+    VALUE_TAG_UNDEF  = '#',
+    VALUE_TAG_TEMP   = 'T',
+    VALUE_TAG_HUM    = 'H',    
+    VALUE_TAG_PRESS  = 'P',
+    VALUE_TAG_LUX    = 'L',
+    VALUE_TAG_PIR    = 'N',   
+    VALUE_TAG_1      = '1',   
+    VALUE_TAG_2      = '2',   
 } sensor_value_et;  
 
-typedef enum
-{
-    UNIT_TYPE_TEMPERATURE = 0,
-    UNIT_TYPE_HUMIDITY,
-    UNIT_TYPE_PRESSURE,
-    UNIT_TYPE_LUX,
-    UNIT_TYPE_PIR,
-    UNIT_TYPE_FLOAT1,
-    UNIT_TYPE_FLOAT2,
-    UNIT_TYPE_NBR_OF,
-} sensor_unit_type_et;
+// typedef enum
+// {
+//     UNIT_TYPE_TEMPERATURE = 0,
+//     UNIT_TYPE_HUMIDITY,
+//     UNIT_TYPE_PRESSURE,
+//     UNIT_TYPE_LUX,
+//     UNIT_TYPE_PIR,
+//     UNIT_TYPE_FLOAT1,
+//     UNIT_TYPE_FLOAT2,
+//     UNIT_TYPE_NBR_OF,
+// } sensor_unit_type_et;
 
-typedef struct
-{
-    float value;
-    float min;
-    float max;
-    float average;
-    float daily_sum;
-    uint16_t    daily_cntr;
-    bool        updated;
-
-} sensor_value_st;
 
 typedef enum
 {
@@ -50,14 +40,39 @@ typedef enum
 
 typedef enum
 {
-    VALUE_TEMPERATURE = 0,
+    VALUE_UNDEFINED = 0,
+    VALUE_TEMPERATURE,
     VALUE_HUMIDITY,
+    VALUE_PRESS,
     VALUE_LUX,
     VALUE_PIR,
     VALUE_1,
     VALUE_2,
     VALUE_NBR_OF
 }  value_et;
+
+typedef struct
+{
+    float last;
+    float min;
+    float max;
+    float average;
+    float daily_sum;
+    uint16_t    daily_cntr;
+    bool        updated;
+
+} sensor_value_st;
+
+
+typedef struct
+{
+    char            label[MAX_TOKEN_LEN];
+    uint8_t         value_indx[VALUE_NBR_OF];
+    bool            updated;
+    //uint16_t        enable_bm;
+    //sensor_value_st value[VALUE_NBR_OF];
+} sensor_st;
+
 
 typedef struct
 {
@@ -69,15 +84,14 @@ typedef struct
     float       value1;
     float       value2;
     bool        updated;
-} sensor_st;
+} xxsensor_st;
 
-typedef struct
-{
-    char        label[MAX_TOKEN_LEN];
-    sensor_value_st data[UNIT_TYPE_NBR_OF];
-    //bool        updated;
-} xsensor_st;
-
+// typedef struct
+// {
+//     char        label[MAX_TOKEN_LEN];
+//     sensor_value_st data[UNIT_TYPE_NBR_OF];
+//     //bool        updated;
+// } zzz;
 
 
 
@@ -93,6 +107,12 @@ typedef struct
 
 
 void sensor_initialize(void);
+
+void sensor_clear(uint8_t sindx);
+
+void sensor_clear_all(void);
+
+void sensor_print(uint8_t sindx);
 
 void sensor_process_msg(uint8_t nbr_fields);
 

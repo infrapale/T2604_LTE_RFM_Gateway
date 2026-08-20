@@ -15,6 +15,7 @@
 
 extern main_ctrl_st main_ctrl;
 extern sensor_st sensor[SENSOR_NBR_OF];
+extern sensor_value_st value_array[];
 
 sms_cmd_st sms_cmd[SMS_CMD_NBR_OF] =
 {
@@ -186,15 +187,20 @@ size_t msg_set_sms_string(char *sms_str)
 void msg_send_repo1(void)
 {
     char    buff[ R69_MSG_SIZE];
+    uint8_t arr_indx[4]; 
+    arr_indx[0] = sensor[SENSOR_KHH].value_indx[VALUE_TEMPERATURE];
+    arr_indx[1] = sensor[SENSOR_KHH].value_indx[VALUE_HUMIDITY];
 
-    sprintf(buff,"OD: %0.1fC, Tupa: %0.1fC, KHH: %0.1fC, Vesi: %0.1fC,",
-        sensor[SENSOR_PIHA1].temperature,
-        sensor[SENSOR_KHH].temperature,
-        sensor[SENSOR_KHH].temperature,
-        14.2f
+    sprintf(buff,"KHH: %0.1fC, Min: %0.1fC, Max: %0.1fC, Avg: %0.1fC, Nbr: %d, Hum: %d%",
+        value_array[arr_indx[0]].last,
+        value_array[arr_indx[0]].min,
+        value_array[arr_indx[0]].max,
+        value_array[arr_indx[0]].average,
+        value_array[arr_indx[0]].daily_cntr,
+        value_array[arr_indx[1]].last
     );
     Serial.println(buff);
-    lte_send_msg(lte_get_sender_nbr(), buff);
+    // lte_send_msg(lte_get_sender_nbr(), buff);
 }
 
 void msg_process_sms_cmd(void)

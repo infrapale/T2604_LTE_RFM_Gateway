@@ -90,17 +90,20 @@ void clock_task(void)
         clock_mgr.my_time = *localtime(&t);     // write back normalized result
         clock_print_date_time(&clock_mgr.my_time);
 
-        clock_mgr.next_minute += 60000;
+        //clock_mgr.next_minute += 60000;
+        clock_mgr.next_minute += 6000;
     }
     if ( clock_mgr.last_hour != clock_mgr.my_time.tm_hour)
     {
         clock_mgr.last_hour = clock_mgr.my_time.tm_hour;
         Serial.printf("Hour: %d", clock_mgr.my_time.tm_hour);
-        switch(clock_mgr.my_time.tm_hour)
-        {
-            case 8:
-                msg_send_repo1();
-                break;
-        }
+        msg_send_repo1();
+        sensor_clear_all();
+        // switch(clock_mgr.my_time.tm_hour)
+        // {
+        //     case 8:
+        //         msg_send_repo1();
+        //         break;
+        // }
     }
 }
