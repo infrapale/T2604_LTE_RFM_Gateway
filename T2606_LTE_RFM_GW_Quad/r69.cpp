@@ -122,6 +122,7 @@ void r69_rx_task(void)
             if(rfm69_modem.msg_is_avail())
             {
                 rfm69_modem.get_msg(r69.rxbuff, R69_MSG_SIZE, true);
+                Serial.print("r69_rx_task: ");
                 Serial.println(r69.rxbuff);
                 nbr_fields = msg_split(r69.rxbuff,';');
                 // Serial.printf("Split nbr %d\n",nbr_fields);

@@ -10,6 +10,7 @@
       ! Remark        max 16 char 
       P PIR           1/0
       N Counter       (16 bit)
+      B Battery       fp 2 decimals
 
 <S;#;RANTA;T1;24.1>
 <S;#;RANTA;T1;24.1;W1;12.8>
@@ -96,8 +97,8 @@ void sensor_clear(uint8_t sindx)
         if(arr_indx != 0)
         {
             value_array[arr_indx].last          = 0.0;
-            value_array[arr_indx].min           = 0.0;
-            value_array[arr_indx].max           = 0.0;
+            value_array[arr_indx].min           = value_array[arr_indx].average;
+            value_array[arr_indx].max           = value_array[arr_indx].average;
             value_array[arr_indx].average       = 0.0;
             value_array[arr_indx].daily_sum     = 0.0;
             value_array[arr_indx].daily_cntr    = 0;
@@ -285,7 +286,7 @@ void sensor_task(void)
     static uint32_t next_send;
     static uint8_t sensor_indx;
     static uint8_t value_indx;
-    Serial.printf("sensor_task: state: %d sensor: %d value: %d\n", sensor_th.state, sensor_indx, value_indx);
+    // Serial.printf("sensor_task: state: %d sensor: %d value: %d\n", sensor_th.state, sensor_indx, value_indx);
     switch(sensor_th.state)
     {
         case 0:

@@ -88,7 +88,7 @@ void clock_task(void)
         clock_mgr.my_time.tm_min += 1;
         time_t t = mktime(&clock_mgr.my_time);  // normalize (handles overflow)
         clock_mgr.my_time = *localtime(&t);     // write back normalized result
-        clock_print_date_time(&clock_mgr.my_time);
+        // clock_print_date_time(&clock_mgr.my_time);
 
         //clock_mgr.next_minute += 60000;
         clock_mgr.next_minute += 6000;
@@ -96,7 +96,7 @@ void clock_task(void)
     if ( clock_mgr.last_hour != clock_mgr.my_time.tm_hour)
     {
         clock_mgr.last_hour = clock_mgr.my_time.tm_hour;
-        Serial.printf("Hour: %d", clock_mgr.my_time.tm_hour);
+        // Serial.printf("Hour: %d\n", clock_mgr.my_time.tm_hour);
         msg_send_repo1();
         sensor_clear_all();
         // switch(clock_mgr.my_time.tm_hour)
