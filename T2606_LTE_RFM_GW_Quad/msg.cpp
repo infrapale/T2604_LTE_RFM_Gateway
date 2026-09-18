@@ -203,6 +203,29 @@ void msg_send_repo1(void)
     // lte_send_msg(lte_get_sender_nbr(), buff);
 }
 
+void msg_send_ruuvi_repo(uint8_t sindx)
+{
+    char    buff[SMS_LEN];
+    uint8_t arr_indx[4]; 
+    arr_indx[0] = sensor[sindx].value_indx[VALUE_TEMPERATURE];
+    arr_indx[1] = sensor[sindx].value_indx[VALUE_HUMIDITY];
+    arr_indx[2] = sensor[sindx].value_indx[VALUE_BAT];
+
+    sprintf(buff,"%s: %0.1fC, Min: %0.1fC, Max: %0.1fC, Avg: %0.1fC, Nbr: %d, Hum: %0.1f, Bat: %0.1fV",
+        sensor[sindx].label,
+        value_array[arr_indx[0]].last,
+        value_array[arr_indx[0]].min,
+        value_array[arr_indx[0]].max,
+        value_array[arr_indx[0]].average,
+        value_array[arr_indx[0]].daily_cntr,
+        value_array[arr_indx[1]].last,
+        value_array[arr_indx[2]].last
+    );
+    Serial.println(buff);
+    lte_send_msg(lte_get_sender_nbr(), buff);
+}
+
+
 void msg_process_sms_cmd(void)
 {
     int cmd_indx = -1; 
@@ -242,7 +265,7 @@ void msg_process_sms_cmd(void)
                 msg_send_repo1();
                 break;
             case SMS_CMD_SENSOR_REPO2:
-                sprintf(buff,"<S;#;REPO2;T;22.3;W;13.4;l;876>");
+                msg_send_ruuvi_repo(SENSOR_PARVEKE);
                 Serial.println(buff);
                 break;
             default:

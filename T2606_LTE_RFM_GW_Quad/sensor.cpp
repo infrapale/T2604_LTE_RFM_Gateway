@@ -40,11 +40,12 @@ extern r69_st r69;
 sensor_value_st value_array[20] = {0};
 
 sensor_st sensor[SENSOR_NBR_OF] =
-{   //                      Label      undef,   temp    hum     pres    lux     pir     val1    val2 updated
-    [SENSOR_UNDEFINED]  = {"Undef", {   0,      0,      0,      0,      0,      0,      0,      0}, false}, 
-    [SENSOR_PIHA1]      = {"PIHA1", {   0,      1,      2,      0,      3,      0,      0,      0}, false}, 
-    [SENSOR_RANTA]      = {"RANTA", {   0,      6,      7,      0,      0,      0,      0,      0}, false}, 
-    [SENSOR_KHH]        = {"KHH",   {   0,     10,     11,      0,      0,      0,      0,      0}, false}, 
+{   //                      Label      undef,   temp    hum     pres    lux     pir     bat     val1    val2 u  pdated
+    [SENSOR_UNDEFINED]  = {"Undef",     {   0,      0,      0,      0,      0,      0,      0,      0,      0}, false}, 
+    [SENSOR_PIHA1]      = {"PIHA1",     {   0,      1,      2,      0,      3,      0,      0,      0,      0}, false}, 
+    [SENSOR_RANTA]      = {"RANTA",     {   0,      6,      7,      0,      0,      0,      0,      0,      0}, false}, 
+    [SENSOR_KHH]        = {"KHH",       {   0,     10,     11,      0,      0,      0,      0,      0,      0}, false}, 
+    [SENSOR_PARVEKE]    = {"Parveke",   {   0,     12,     13,      0,      0,      0,     14,      0,      0}, false}, 
 };
 
 char value_label[VALUE_NBR_OF][10] =
@@ -55,6 +56,7 @@ char value_label[VALUE_NBR_OF][10] =
     [VALUE_PRESS]       = "Press    ",
     [VALUE_LUX]         = "LUX      ",
     [VALUE_PIR]         = "PIR      ",
+    [VALUE_BAT]         = "Bat      ",
     [VALUE_1]           = "Value 1  ",
     [VALUE_2]           = "Value 2  ",
 
@@ -68,6 +70,7 @@ char value_tag[VALUE_NBR_OF] =
     [VALUE_PRESS]       = VALUE_TAG_PRESS,
     [VALUE_LUX]         = VALUE_TAG_LUX,
     [VALUE_PIR]         = VALUE_TAG_PIR,
+    [VALUE_BAT]         = VALUE_TAG_BAT,
     [VALUE_1]           = VALUE_TAG_1,
     [VALUE_2]           = VALUE_TAG_2,
 
@@ -186,7 +189,10 @@ void sensor_store_value(uint8_t sindx, uint8_t vindx, float fval)
     if((vindx > VALUE_UNDEFINED) && (vindx < VALUE_NBR_OF))
     {
         value_array[arr_indx].last = fval;
-        if(fval < value_array[arr_indx].min) value_array[arr_indx].min = fval;
+        if(value_array[arr_indx].daily_cntr == 0) 
+            value_array[arr_indx].min = fval;
+        else
+            if(fval < value_array[arr_indx].min) value_array[arr_indx].min = fval;
         if(fval > value_array[arr_indx].max) value_array[arr_indx].max = fval;
         value_array[arr_indx].daily_sum += fval;
         value_array[arr_indx].daily_cntr++;
@@ -229,6 +235,9 @@ uint8_t sensor_save_values(uint8_t sindx)
                 case VALUE_TAG_PIR:
                     sensor_store_value(sindx, VALUE_PIR, fval);
                     break;
+                case VALUE_TAG_BAT:
+                    sensor_store_value(sindx, VALUE_BAT, fval);
+                    break;
                 case VALUE_TAG_1:
                     sensor_store_value(sindx, VALUE_1, fval);
                     break;
@@ -268,6 +277,9 @@ void sensor_process_msg(uint8_t  nbr_fields)
                     sensor_save_values(sindx);
                     break;
                 case SENSOR_KHH:
+                    sensor_save_values(sindx);
+                    break;
+                case SENSOR_PARVEKE:
                     sensor_save_values(sindx);
                     break;
             }

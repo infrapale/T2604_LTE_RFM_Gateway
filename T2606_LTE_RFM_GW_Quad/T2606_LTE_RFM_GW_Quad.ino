@@ -57,7 +57,7 @@ void setup() {
 
 
     delay(1500);
-    //Serial1.begin(115200);
+    Serial1.begin(115200);
     atask_initialize();
     clock_initialize();
     msg_initialize();

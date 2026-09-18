@@ -12,6 +12,7 @@ typedef enum
     VALUE_TAG_PRESS  = 'P',
     VALUE_TAG_LUX    = 'L',
     VALUE_TAG_PIR    = 'N',   
+    VALUE_TAG_BAT    = 'B',   
     VALUE_TAG_1      = '1',   
     VALUE_TAG_2      = '2',   
 } sensor_value_et;  
@@ -35,6 +36,7 @@ typedef enum
     SENSOR_PIHA1,
     SENSOR_RANTA,
     SENSOR_KHH,
+    SENSOR_PARVEKE,
     SENSOR_NBR_OF,
 } sensor_et;
 
@@ -46,6 +48,7 @@ typedef enum
     VALUE_PRESS,
     VALUE_LUX,
     VALUE_PIR,
+    VALUE_BAT,
     VALUE_1,
     VALUE_2,
     VALUE_NBR_OF
