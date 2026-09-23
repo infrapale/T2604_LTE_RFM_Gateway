@@ -62,7 +62,7 @@ void setup() {
     clock_initialize();
     msg_initialize();
     r69_initialize();
-    // atask_add_new(&debug_th);
+    atask_add_new(&debug_th);
     lte_initialize();
     sensor_initialize();
 }

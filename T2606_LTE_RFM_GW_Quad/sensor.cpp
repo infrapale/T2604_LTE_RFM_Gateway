@@ -37,7 +37,7 @@
 extern msg_st msg;
 extern r69_st r69;
 
-sensor_value_st value_array[20] = {0};
+sensor_value_st value_array[30] = {0};
 
 sensor_st sensor[SENSOR_NBR_OF] =
 {   //                      Label      undef,   temp    hum     pres    lux     pir     bat     val1    val2 u  pdated
@@ -46,8 +46,13 @@ sensor_st sensor[SENSOR_NBR_OF] =
     [SENSOR_RANTA]      = {"RANTA",     {   0,      6,      7,      0,      0,      0,      0,      0,      0}, false}, 
     [SENSOR_KHH]        = {"KHH",       {   0,     10,     11,      0,      0,      0,      0,      0,      0}, false}, 
     [SENSOR_PARVEKE]    = {"Parveke",   {   0,     12,     13,      0,      0,      0,     14,      0,      0}, false}, 
+    [SENSOR_RUUVI_3072] = {"3072",      {   0,     15,     16,      0,      0,      0,     17,      0,      0}, false}, 
+    [SENSOR_RUUVI_939B] = {"939B",      {   0,     18,     19,      0,      0,      0,     20,      0,      0}, false}, 
+    [SENSOR_RUUVI_1FEA] = {"1FEA",      {   0,     21,     22,      0,      0,      0,     23,      0,      0}, false}, 
+    [SENSOR_RUUVI_MH1]  = {"MH1",       {   0,     24,     25,      0,      0,      0,     26,      0,      0}, false}, 
 };
 
+    
 char value_label[VALUE_NBR_OF][10] =
 {   //                     123456789
     [VALUE_UNDEFINED]   = "Undef    ",

@@ -225,6 +225,43 @@ void msg_send_ruuvi_repo(uint8_t sindx)
     lte_send_msg(lte_get_sender_nbr(), buff);
 }
 
+void safe_append(char *dst, size_t dst_size,  const char *src)
+{
+    size_t len_dst = strnlen(dst, dst_size);
+    size_t len_src = strnlen(src, dst_size);
+
+    if (len_dst + len_src + 1 > dst_size) {
+        // Not enough space — truncate safely
+        size_t copy_len = dst_size - len_dst - 1;
+        memcpy(dst + len_dst, src, copy_len);
+        dst[dst_size - 1] = '\0';
+        return;
+    }
+
+    memcpy(dst + len_dst, src, len_src);
+    dst[len_dst + len_src] = '\0';
+}
+
+#define ONE_SENSOR_LEN  32
+void msg_send_all_temp(void)
+{
+    char    buff[SMS_LEN] = {0};
+    char    one_buff[ONE_SENSOR_LEN];
+
+    for(uint8_t sindx = SENSOR_UNDEFINED + 1; sindx < SENSOR_NBR_OF; sindx++)
+    {
+        sprintf(one_buff,"%s: %0.1fC,",
+            sensor[sindx].label,
+            value_array[sensor[sindx].value_indx[VALUE_TEMPERATURE]].last
+            safe_append(buff, SMS_LEN, one_buff);
+        );       
+    }
+
+    Serial.println(buff);
+    lte_send_msg(lte_get_sender_nbr(), buff);
+}
+
+
 
 void msg_process_sms_cmd(void)
 {
@@ -266,7 +303,11 @@ void msg_process_sms_cmd(void)
                 break;
             case SMS_CMD_SENSOR_REPO2:
                 msg_send_ruuvi_repo(SENSOR_PARVEKE);
-                Serial.println(buff);
+                //Serial.println(buff);
+                break;
+            case SMS_CMD_ALL_TEMPERATURE:
+                msg_send_all_temp();
+                //Serial.println(buff);
                 break;
             default:
                 break;

@@ -132,7 +132,7 @@ void r69_rx_task(void)
                     case 'S':
                         sensor_process_msg(nbr_fields);
                         break;
-                    case 'T':
+                    case 't':
                         Serial.println("Time message:");
                         msg_time_action();
                         break;

@@ -343,10 +343,6 @@ void lte_task(void)
     static lte_msg_et body_status = LTE_MSG_UNDEF;
     static uint32_t body_timeout;
     
-    if(lte_th.state != lte.prev_state){
-        Serial.printf("LTE State %d -> %d\n", lte.prev_state, lte_th.state);
-        lte.prev_state = lte_th.state;
-    }
     switch(lte_th.state)
     {
         case 0:
@@ -432,6 +428,10 @@ void lte_task(void)
             lte_th.state = 100;
             break;
 
+    }
+    if(lte_th.state != lte.prev_state){
+        Serial.printf("LTE State %d -> %d\n", lte.prev_state, lte_th.state);
+        lte.prev_state = lte_th.state;
     }
 }
 

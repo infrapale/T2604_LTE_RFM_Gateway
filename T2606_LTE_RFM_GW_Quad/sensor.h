@@ -37,6 +37,10 @@ typedef enum
     SENSOR_RANTA,
     SENSOR_KHH,
     SENSOR_PARVEKE,
+    SENSOR_RUUVI_3072,
+    SENSOR_RUUVI_939B,
+    SENSOR_RUUVI_1FEA,
+    SENSOR_RUUVI_MH1,
     SENSOR_NBR_OF,
 } sensor_et;
 

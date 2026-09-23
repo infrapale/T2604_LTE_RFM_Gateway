@@ -23,6 +23,7 @@ typedef enum
     SMS_CMD_SENSOR_PIHA1,
     SMS_CMD_SENSOR_REPO1,
     SMS_CMD_SENSOR_REPO2,
+    SMS_CMD_ALL_TEMPERATURE,
     SMS_CMD_NBR_OF
 } sms_cmd_type_et;
 
