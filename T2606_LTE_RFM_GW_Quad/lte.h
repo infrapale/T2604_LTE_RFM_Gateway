@@ -12,8 +12,9 @@
 
 
 #define LteSerial Serial1
-#define SMS_LEN     160
-#define MSG_LEN     512
+#define SMS_LEN             160
+#define SMS_INP_BUFF_LEN    1024
+#define MSG_LEN             512
 
 typedef enum
 {

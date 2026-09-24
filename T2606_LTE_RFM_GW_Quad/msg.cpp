@@ -253,8 +253,8 @@ void msg_send_all_temp(void)
         sprintf(one_buff,"%s: %0.1fC,",
             sensor[sindx].label,
             value_array[sensor[sindx].value_indx[VALUE_TEMPERATURE]].last
-            safe_append(buff, SMS_LEN, one_buff);
         );       
+        safe_append(buff, SMS_LEN, one_buff);
     }
 
     Serial.println(buff);

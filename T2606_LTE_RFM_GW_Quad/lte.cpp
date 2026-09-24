@@ -79,7 +79,7 @@ void lte_flush_serial(uint32_t timeout = 300) {
   while (millis() - start < timeout) {
     while (LteSerial.available()) {
       LteSerial.read();
-      start = millis();
+      // start = millis();  !!CoPilot
     }
     delay(2);
   }
@@ -252,7 +252,11 @@ bool lte_parse_message(void)
 
         //strncpy(lte_msg.sender, sender, sizeof(lte_msg->sender));
         // strncpy(lte_msg->timestamp, timestamp, sizeof(lte_msg->timestamp));
-    } else parse_res = false;
+    } else {
+        parse_res = false;
+        lte_clear_msg(&lte_msg);
+        lte_msg.available = false;
+    }
     return parse_res;
 }
 
@@ -374,7 +378,7 @@ void lte_task(void)
                 lte.wait_until = millis() + 800;
                 lte_th.state = 25;
             }
-
+            break;
         case 25:
             if (millis() > lte.wait_until)
             {
