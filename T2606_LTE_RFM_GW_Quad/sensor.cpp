@@ -253,7 +253,7 @@ uint8_t sensor_save_values(uint8_t sindx)
         }
         findx += 2;
     }
-    sensor_print(sindx);
+    //sensor_print(sindx);
     sensor[sindx].updated = true;
 
     return saved_values;
@@ -287,6 +287,14 @@ void sensor_process_msg(uint8_t  nbr_fields)
                 case SENSOR_PARVEKE:
                     sensor_save_values(sindx);
                     break;
+                case SENSOR_RUUVI_3072:
+                case SENSOR_RUUVI_939B:
+                case SENSOR_RUUVI_1FEA:
+                case SENSOR_RUUVI_MH1:
+                    sensor_save_values(sindx);
+                    break;
+
+
             }
             break;
         case 'T':

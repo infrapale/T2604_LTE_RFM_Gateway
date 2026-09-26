@@ -5,6 +5,7 @@
 typedef struct 
 {
     struct tm   my_time;
+    time_t      time_epoch;
     char        buff[64];
     uint32_t    next_minute;
     uint8_t     last_hour;

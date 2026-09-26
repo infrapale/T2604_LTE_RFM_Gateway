@@ -25,6 +25,8 @@ sms_cmd_st sms_cmd[SMS_CMD_NBR_OF] =
     {"PIHA1",   SMS_CMD_SENSOR_PIHA1},
     {"REPO1",   SMS_CMD_SENSOR_REPO1},
     {"REPO2",   SMS_CMD_SENSOR_REPO2},
+    {"TEMP",    SMS_CMD_ALL_TEMPERATURE},
+
 };
 
 void msg_task(void);
