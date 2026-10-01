@@ -124,6 +124,8 @@ void r69_rx_task(void)
                 rfm69_modem.get_msg(r69.rxbuff, R69_MSG_SIZE, true);
                 Serial.print("r69_rx_task: ");
                 Serial.println(r69.rxbuff);
+                SERIAL_TFT.println(r69.rxbuff);
+
                 nbr_fields = msg_split(r69.rxbuff,';');
                 // Serial.printf("Split nbr %d\n",nbr_fields);
                 // msg_sub_print();

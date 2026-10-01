@@ -42,7 +42,6 @@ void clock_initialize(void)
     clock_mgr.last_hour = 0;
     clock_mgr.new_hour_event = false;
 }
-
 void clock_print_date_time(const struct tm *t)
 { 
     char buff[40];
@@ -50,6 +49,10 @@ void clock_print_date_time(const struct tm *t)
     strftime(buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", t);
     Serial.println(buff);
     
+}
+void clock_print_my_time(void)
+{
+    clock_print_date_time(&clock_mgr.my_time);
 }
 
 void clock_set_date_time(void)
@@ -138,6 +141,8 @@ void clock_task(void)
 {
     if (millis() > clock_mgr.next_minute)
     {
+        clock_mgr.next_minute += 60000;   // real minute; use 6000 only for testing
+
         // Advance canonical epoch time by one minute
         clock_mgr.time_epoch += 60;
 
@@ -149,17 +154,24 @@ void clock_task(void)
         struct tm *lt = localtime(&clock_mgr.time_epoch);
         if (lt != nullptr) {
             clock_mgr.my_time = *lt;
-            // clock_print_date_time(&clock_mgr.my_time);
+            //clock_print_date_time(&clock_mgr.my_time);
         }
 
-        clock_mgr.next_minute += 60000;   // real minute; use 6000 only for testing
     }
 
     if (clock_mgr.last_hour != clock_mgr.my_time.tm_hour)
     {
         clock_mgr.last_hour = clock_mgr.my_time.tm_hour;
-        msg_send_repo1();
-        sensor_clear_all();
+        Serial.println("@ @ @ New Hour @ @ @");
+        clock_print_my_time();
+        switch(clock_mgr.my_time.tm_hour)
+        {
+            case 8:
+                Serial.println("* * * Send Report * * *");
+                msg_send_all_temp();
+                sensor_clear_all();
+                break;
+        }
     }
 }
 

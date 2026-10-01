@@ -64,4 +64,6 @@ void msg_time_action(void);
 
 void msg_send_repo1(void);
 
+void msg_send_all_temp(void);
+
 #endif

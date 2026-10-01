@@ -16,4 +16,6 @@ void clock_initialize(void);
 
 void clock_set_date_time(void);
 
+void clock_print_my_time(void);
+
 #endif

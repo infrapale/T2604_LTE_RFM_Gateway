@@ -31,7 +31,7 @@ main_ctrl_st main_ctrl = {
 };
 
 void print_debug_task(void);
-atask_st debug_th       =     {"Debug Task     ", 2000,    0,     0,  255,    0,  1,  print_debug_task };
+atask_st debug_th       =     {"Debug Task     ", 60000,    0,     0,  255,    0,  1,  print_debug_task };
 
 #define BUFF_LEN   80
 char mbuff[BUFF_LEN];
@@ -42,12 +42,15 @@ extern lte_msg_st lte_msg;
 
 void print_debug_task(void)
 {
+  clock_print_my_time();
   atask_print_status(true);
 }
 
 void setup() {
     Serial1.setTX(PIN_TX0);   
     Serial1.setRX(PIN_RX0);
+    Serial2.setTX(PIN_TX1);   
+    Serial2.setRX(PIN_RX1);
     Serial.begin(115200);
  
     SPI.setSCK( PIN_RFM_SCK );   
@@ -58,6 +61,7 @@ void setup() {
 
     delay(1500);
     Serial1.begin(115200);
+    Serial2.begin(9600);
     atask_initialize();
     clock_initialize();
     msg_initialize();

@@ -3,6 +3,8 @@
 
 #define T2601_PICO_RFM69
 
+#define SERIAL_TFT      Serial2
+
 #ifdef  MCU_PICO_PLUS_2
     #define PIN_TX0     (32u)
     #define PIN_RX0     (33u)
